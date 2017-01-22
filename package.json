@@ -1,0 +1,25 @@
+{
+  "name": "Async-Voter",
+  "version": "1.0.0",
+  "description": "For Voting on Stories and Tickets remotely and asynchronously",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "engines": {
+    "npm" : "4.0.5",
+    "node": "7.4.0"
+  },
+  "author": "AgileVentures",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "dotenv": "^4.0.0",
+    "express": "^4.14.0",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
