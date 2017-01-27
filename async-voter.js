@@ -5,7 +5,7 @@ const clientSecret = process.env.CLIENT_SECRET
 
 module.exports = (app) => {
 
-    let votes = []
+    let repository = new Map()
 
     app.get('/', (req, res) => {
         res.send('It is working! Path Hit: ' + req.url)
@@ -15,7 +15,6 @@ module.exports = (app) => {
         if (!req.query.code) {
             res.status(500)
             res.send({"Error": "Looks like we're not getting code."})
-            console.log("Looks like we're not getting code.")
         } else {
             request({
                 url: 'https://slack.com/api/oauth.access',
@@ -23,9 +22,10 @@ module.exports = (app) => {
                 method: 'GET',
             }, (error, response, body) => {
                 if (error) {
-                    console.log(error)
+                    res.status(500)
+                    res.send({"Error": error})
                 } else {
-                    res.json(body)
+                    res.redirect('/')
                 }
             })
         }
@@ -33,13 +33,18 @@ module.exports = (app) => {
 
     app.post('/commands', (req, res) => {
         const text = req.body.text
+        const channel_id = req.body.channel_id
 
-        // TODO: Create and store an unique voting session. Issue + Team
-        votes = []
+        // TODO: Close previous session. One session per channel is allowed.
+        if (repository.has(channel_id))
+            repository.delete(channel_id)
+
+        // TODO: Save unique voting session. Team + Channel
+        repository.set(channel_id, [])
 
         const msg = {
             "response_type": "in_channel",
-            "text": `@here ASYNC VOTE on "${text}"`,
+            "text": `<!here> ASYNC VOTE on "${text}"`,
             "attachments": [
             {
                 "text": "Please choose a dificulty",
@@ -80,6 +85,9 @@ module.exports = (app) => {
         const actions = payload.actions
         const text = payload.original_message.text
         const user = payload.user
+        const channel_id = payload.channel.id
+
+        let votes = repository.get(channel_id)
 
         if (actions[0].value === 'reveal') {
             const result = votes.map((vote) => {return `\n@${vote.user.name} ${vote.vote}`})
@@ -93,6 +101,7 @@ module.exports = (app) => {
         } else {
             // TODO: Count vote for different voting sessions
             votes.push({'user': user, 'vote': actions[0].value})
+            repository.set(channel_id, votes)
 
             const users = votes.map((vote) => {return ` @${vote.user.name} `})
 
