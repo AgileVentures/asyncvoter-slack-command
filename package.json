@@ -5,10 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "nyc mocha test.js",
+    "test:watch": "mocha -w test.js",
+    "test:debug": "mocha --inspect --debug-brk test.js"
   },
   "engines": {
-    "npm" : "4.0.5",
+    "npm": "4.0.5",
     "node": "7.4.0"
   },
   "author": "AgileVentures",
@@ -20,6 +23,11 @@
     "request": "^2.79.0"
   },
   "devDependencies": {
-    "nodemon": "^1.11.0"
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.2.0",
+    "nock": "^9.0.2",
+    "nodemon": "^1.11.0",
+    "nyc": "^10.1.2"
   }
 }
