@@ -11,9 +11,11 @@ Slack app for Voting on Stories and Tickets remotely and asynchronously.
 
 3. Install dependencies `npm install`
 
-4. Run the server `npm run dev`
+4. Run tests `npm test`
 
-5. Go to <http://localhost:4390> and follow the instructions.
+5. Run the server `npm run dev`
+
+6. Go to <http://localhost:4390> and follow the instructions.
 
 ## Live environments
 
