@@ -63,13 +63,13 @@ module.exports = (app) => {
                     "name": "Medium",
                     "text": "Medium",
                     "type": "button",
-                    "value": "Simple"
+                    "value": "Medium"
                 },
                 {
                     "name": "Hard",
                     "text": "Hard",
                     "type": "button",
-                    "value": "Simple"
+                    "value": "Hard"
                 },
                 ]
             }
@@ -126,13 +126,13 @@ module.exports = (app) => {
                         "name": "Medium",
                         "text": "Medium",
                         "type": "button",
-                        "value": "Simple"
+                        "value": "Medium"
                     },
                     {
                         "name": "Hard",
                         "text": "Hard",
                         "type": "button",
-                        "value": "Simple"
+                        "value": "Hard"
                     },
                     {
                         "name": "reveal",
