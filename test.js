@@ -21,6 +21,7 @@ describe('Explain usage', () => {
     .end((err, res) => {
       res.should.have.status(200)
       res.should.be.html
+
       done()
     })
   })
@@ -40,6 +41,7 @@ describe('Install app', () => {
     .query({ code, client_id, client_secret})
     .end((err, res) => {
       res.should.redirect
+
       done()
     })
   })
@@ -54,6 +56,10 @@ describe('Run a voting session', () => {
       res.should.have.status(200)
       res.should.be.json
       res.should.have.property('text')
+      res.body.attachments[0].actions[0].value.should.equals('Simple')
+      res.body.attachments[0].actions[1].value.should.equals('Medium')
+      res.body.attachments[0].actions[2].value.should.equals('Hard')
+
       done()
     })
   })
@@ -64,7 +70,7 @@ describe('Run a voting session', () => {
     .send({ 
       payload: JSON.stringify({
         channel: { id: 1 },
-        actions: [{ value: 'simple' }],
+        actions: [{ value: 'Medium' }],
         user: {},
         original_message: { text: 'Feature 1' }
       })
@@ -72,11 +78,16 @@ describe('Run a voting session', () => {
     .end((err, res) => {
       res.should.have.status(200)
       res.should.be.json
+      res.body.attachments[0].actions[0].value.should.equals('Simple')
+      res.body.attachments[0].actions[1].value.should.equals('Medium')
+      res.body.attachments[0].actions[2].value.should.equals('Hard')
+      res.body.attachments[0].actions[3].value.should.equals('reveal')
+
       done()
     })
   })
 
-  it('Reveal the results', () => {
+  it('Reveal the results', (done) => {
     chai.request(server)
     .post('/actions')
     .send({ 
@@ -90,6 +101,8 @@ describe('Run a voting session', () => {
     .end((err, res) => {
       res.should.have.status(200)
       res.should.be.json
+      res.body.text.should.have.string('Medium')
+
       done()
     })
   })
