@@ -1,6 +1,8 @@
 require('dotenv').config({path: './.env.example'})
 
-const server = require('./index')
+const app = require('./index').app
+const server = require('./index').server
+const db = require('./index').db
 
 const chai = require('chai')
 const should = chai.should()
@@ -37,7 +39,7 @@ describe('Install app', () => {
     .query({ code, client_id, client_secret})
     .reply(200)
 
-    chai.request(server)
+    chai.request(app)
     .get('/oauth')
     .query({ code, client_id, client_secret})
     .end((err, res) => {
@@ -49,8 +51,13 @@ describe('Install app', () => {
 })
 
 describe('Run a voting session', () => {
+
+  before((done) => {
+    db.flushdb(done);
+  })
+
   it('Start a voting session', (done) => {
-    chai.request(server)
+    chai.request(app)
     .post('/commands')
     .send({ text: 'Feature 1', channel_id: 1 })
     .end((err, res) => {
@@ -66,19 +73,21 @@ describe('Run a voting session', () => {
   })
 
   it('Record a vote', (done) => {
-    chai.request(server)
+    chai.request(app)
     .post('/actions')
     .send({ 
       payload: JSON.stringify({
         channel: { id: 1 },
         actions: [{ value: 'Medium' }],
-        user: {},
+        user: { name: 'User 1'},
         original_message: { text: 'Feature 1' }
       })
     })
     .end((err, res) => {
       res.should.have.status(200)
       res.should.be.json
+      res.body.attachments[0].text.should.have.string('1 vote')
+      res.body.attachments[0].text.should.have.string('User 1')
       res.body.attachments[0].actions[0].value.should.equals('Simple')
       res.body.attachments[0].actions[1].value.should.equals('Medium')
       res.body.attachments[0].actions[2].value.should.equals('Hard')
@@ -89,13 +98,13 @@ describe('Run a voting session', () => {
   })
 
   it('Reveal the results', (done) => {
-    chai.request(server)
+    chai.request(app)
     .post('/actions')
     .send({ 
       payload: JSON.stringify({
         channel: { id: 1 },
         actions: [{ value: 'reveal' }],
-        user: {},
+        user: { name: 'User 1'},
         original_message: { text: 'Feature 1' }
       })
     })
@@ -107,6 +116,42 @@ describe('Run a voting session', () => {
       done()
     })
   })
+})
+
+describe('Persistence', (done) => {
+
+  before((done) => {
+    db.flushdb(() => {
+      let votes = []
+      votes.push({'user': { name: 'User 1' }, 'vote': 'Simple'})
+      db.set(1, JSON.stringify(votes), (err, value) => {
+        done()
+      })
+    });
+  })
+
+  it('Record a vote to a restarted session', (done) => {
+    chai.request(app)
+    .post('/actions')
+    .send({
+      payload: JSON.stringify({
+        channel: { id: 1 },
+        actions: [{ value: 'Medium' }],
+        user: { name: 'User 2'},
+        original_message: { text: 'Feature 1' }
+      })
+    })
+    .end((err, res) => {
+      res.should.have.status(200)
+      res.should.be.json
+      res.body.attachments[0].text.should.have.string('2 vote')
+      res.body.attachments[0].text.should.have.string('User 1')
+      res.body.attachments[0].text.should.have.string('User 2')
+
+      done()
+    })
+  })
+
 })
 
 const pprint = (json) => JSON.stringify(json, null, '\t')
