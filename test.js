@@ -14,13 +14,15 @@ const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
 
-describe('Explain usage', () => {
-  it('Display an static site (for now)', (done) => {
+describe('Landing page', () => {
+  it('Display Slack button', (done) => {
     chai.request(server)
     .get('/')
     .end((err, res) => {
       res.should.have.status(200)
       res.should.be.html
+      res.text.should.have.string(client_id)
+
       done()
     })
   })

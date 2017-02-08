@@ -8,7 +8,7 @@ module.exports = (app) => {
     let repository = new Map()
 
     app.get('/', (req, res) => {
-        res.send('It is working! Path Hit: ' + req.url)
+        res.render('index', { client_id: clientId })
     })
 
     app.get('/oauth', (req, res) => {
