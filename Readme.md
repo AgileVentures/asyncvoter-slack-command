@@ -1,5 +1,9 @@
 Slack app for Voting on Stories and Tickets remotely and asynchronously.
 
+## Requirements
+
+- Redis
+
 ## Development
 
 1. Read [Getting started with Slack apps](https://api.slack.com/slack-apps) and [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
