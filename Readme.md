@@ -9,12 +9,12 @@ Slack app for Voting on Stories and Tickets remotely and asynchronously.
 
 ## Known Issues
 
-- Votes cannot be reseted. But users can vote multiple times on the same issue.
+- Votes cannot be reset. But users can vote multiple times on the same issue.
 - It supports parallel voting sessions in different channels only.
 
 ## Questions/feedback?
 
-Create an issue in this repo, or contact https://agileventures.slack.com/messages/async_voter
+Create an issue in this repo, or contact us at [#async_voter](https://agileventures.slack.com/messages/async_voter)
 
 ## Requirements
 
