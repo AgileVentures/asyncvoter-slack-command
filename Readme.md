@@ -1,11 +1,25 @@
 Slack app for Voting on Stories and Tickets remotely and asynchronously.
 
-http://asyncvoter.tk
+## Usage
+
+1. Install this app to your Slack team visiting http://asyncvoter.tk and pressing on the `Add to Slack` button.
+2. Run a voting session on an issue launching the new `/vote issue` command in any channel.
+3. Submit your vote pressing on any of the three difficulty buttons (Easy, Medium or Hard).
+4. Finish and reveal the result of the voting session by pressing on the `Reveal` button. (We recommend to wait until you will receive 3 or more votes)
+
+## Known Issues
+
+- Votes cannot be reseted. But users can vote multiple times on the same issue.
+- It supports parallel voting sessions in different channels only.
+
+## Questions/feedback?
+
+Create an issue in this repo, or contact https://agileventures.slack.com/messages/async_voter
 
 ## Requirements
 
-- [Redis](https://redis.io/) v3.2.8
-- [Node](https://nodejs.org) v7.6.0
+- [Redis](https://redis.io/) v3.2.8 or later
+- [Node](https://nodejs.org) v7.6.0 or later
 
 ## Development
 
@@ -28,6 +42,6 @@ You **need** to set up your own Slack **team** and Slack **app** to continue!
 - Go to <http://localhost:4390> and follow the instructions.
 
 ## References
+
 - [Getting started with Slack apps](https://api.slack.com/slack-apps)
 - [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
-
