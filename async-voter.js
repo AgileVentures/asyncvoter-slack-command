@@ -72,7 +72,7 @@ module.exports = (app, repository) => {
       'text': `<!here> ASYNC VOTE on "${text}"`,
       'attachments': [
         {
-          'text': 'Please choose a dificulty',
+          'text': 'Please choose a difficulty',
           'fallback': 'Woops! Something bad happens!',
           'callback_id': 'voting_session',
           'color': '#3AA3E3',
