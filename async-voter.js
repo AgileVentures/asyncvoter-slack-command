@@ -6,22 +6,22 @@ const clientSecret = process.env.CLIENT_SECRET
 module.exports = (app, repository) => {
 
   app.get('/', (req, res) => {
-        res.render('index', { client_id: clientId })
+    res.render('index', { client_id: clientId })
   })
 
   app.get('/oauth', (req, res) => {
     if (!req.query.code) {
       res.status(500)
-      res.send({'Error': "Looks like we're not getting code."})
+      res.send({ 'Error': "Looks like we're not getting code." })
     } else {
       request({
         url: 'https://slack.com/api/oauth.access',
-        qs: {code: req.query.code, client_id: clientId, client_secret: clientSecret},
+        qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
         method: 'GET'
       }, (error, response, body) => {
         if (error) {
           res.status(500)
-          res.send({'Error': error})
+          res.send({ 'Error': error })
         } else {
           res.redirect('/')
         }
@@ -57,7 +57,7 @@ module.exports = (app, repository) => {
         res.send(formatResult(text, votes))
       } else {
         // TODO: Count vote for different voting sessions
-        votes.push({'user': user, 'vote': actions[0].value})
+        votes.push({ 'user': user, 'vote': actions[0].value })
 
         repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
@@ -70,42 +70,38 @@ module.exports = (app, repository) => {
     const msg = {
       'response_type': 'in_channel',
       'text': `<!here> ASYNC VOTE on "${text}"`,
-      'attachments': [
-        {
-          'text': 'Please choose a difficulty',
-          'fallback': 'Woops! Something bad happens!',
-          'callback_id': 'voting_session',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'actions': [
-            {
-              'name': 'Simple',
-              'text': 'Simple',
-              'type': 'button',
-              'value': 'Simple'
-            },
-            {
-              'name': 'Medium',
-              'text': 'Medium',
-              'type': 'button',
-              'value': 'Medium'
-            },
-            {
-              'name': 'Hard',
-              'text': 'Hard',
-              'type': 'button',
-              'value': 'Hard'
-            }
-          ]
-        }
-      ]
+      'attachments': [{
+        'text': 'Please choose a difficulty',
+        'fallback': 'Woops! Something bad happens!',
+        'callback_id': 'voting_session',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [{
+          'name': 'Simple',
+          'text': 'Simple',
+          'type': 'button',
+          'value': 'Simple'
+        }, {
+          'name': 'Medium',
+          'text': 'Medium',
+          'type': 'button',
+          'value': 'Medium'
+        }, {
+          'name': 'Hard',
+          'text': 'Hard',
+          'type': 'button',
+          'value': 'Hard'
+        }]
+      }]
     }
 
     return msg
   }
 
   const formatResult = (text, votes) => {
-    const result = votes.map((vote) => { return `\n@${vote.user.name} ${vote.vote}` })
+    const result = votes.map((vote) => {
+      return `\n@${vote.user.name} ${vote.vote}`
+    })
 
     const msg = {
       'response_type': 'in_channel',
@@ -116,53 +112,48 @@ module.exports = (app, repository) => {
   }
 
   const formatRegister = (text, votes) => {
-    const users = votes.map((vote) => { return ` @${vote.user.name} ` })
+    const users = votes.map((vote) => {
+      return ` @${vote.user.name} `
+    })
 
     const msg = {
       'response_type': 'in_channel',
       'text': text,
-      'attachments': [
-        {
-          'text': `${votes.length} vote(s) so far [${users}]`,
-          'fallback': 'Woops! Something bad happens!',
-          'callback_id': 'voting_session',
-          'color': '#3AA3E3',
-          'attachment_type': 'default',
-          'actions': [
-            {
-              'name': 'Simple',
-              'text': 'Simple',
-              'type': 'button',
-              'value': 'Simple'
-            },
-            {
-              'name': 'Medium',
-              'text': 'Medium',
-              'type': 'button',
-              'value': 'Medium'
-            },
-            {
-              'name': 'Hard',
-              'text': 'Hard',
-              'type': 'button',
-              'value': 'Hard'
-            },
-            {
-              'name': 'reveal',
-              'text': 'Reveal',
-              'style': 'danger',
-              'type': 'button',
-              'value': 'reveal',
-              'confirm': {
-                'title': 'Are you sure?',
-                'text': 'This will reveal all the votes',
-                'ok_text': 'Yes',
-                'dismiss_text': 'No'
-              }
-            }
-          ]
-        }
-      ]
+      'attachments': [{
+        'text': `${votes.length} vote(s) so far [${users}]`,
+        'fallback': 'Woops! Something bad happens!',
+        'callback_id': 'voting_session',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': [{
+          'name': 'Simple',
+          'text': 'Simple',
+          'type': 'button',
+          'value': 'Simple'
+        }, {
+          'name': 'Medium',
+          'text': 'Medium',
+          'type': 'button',
+          'value': 'Medium'
+        }, {
+          'name': 'Hard',
+          'text': 'Hard',
+          'type': 'button',
+          'value': 'Hard'
+        }, {
+          'name': 'reveal',
+          'text': 'Reveal',
+          'style': 'danger',
+          'type': 'button',
+          'value': 'reveal',
+          'confirm': {
+            'title': 'Are you sure?',
+            'text': 'This will reveal all the votes',
+            'ok_text': 'Yes',
+            'dismiss_text': 'No'
+          }
+        }]
+      }]
     }
 
     return msg
