@@ -64,10 +64,16 @@ describe('Run a voting session', () => {
         res.should.have.status(200)
         res.should.be.json
         res.should.have.property('text')
-        res.body.attachments[0].actions[0].value.should.equals('Simple')
-        res.body.attachments[0].actions[1].value.should.equals('Medium')
-        res.body.attachments[0].actions[2].value.should.equals('Hard')
 
+        const responseText = res.body.attachments[0].text
+        responseText.should.be.a('string')
+        responseText.should.equals('Please choose a difficulty')
+        responseText.should.not.match(/dificult/i)
+
+        const actions = res.body.attachments[0].actions
+        actions[0].value.should.equals('Simple')
+        actions[1].value.should.equals('Medium')
+        actions[2].value.should.equals('Hard')
         done()
       })
   })
@@ -116,7 +122,10 @@ describe('Run a voting session', () => {
         done()
       })
   })
+
+
 })
+
 
 describe('Persistence', (done) => {
 
@@ -148,28 +157,6 @@ describe('Persistence', (done) => {
         res.body.attachments[0].text.should.have.string('User 1')
         res.body.attachments[0].text.should.have.string('User 2')
 
-        done()
-      })
-  })
-
-})
-
-describe('Minor Fixes', (done) => {
-
-  it('Dificulty -> Difficulty spelling fix', (done) => {
-    chai.request(app)
-      .post('/commands')
-      .send({
-        channel_id: '18_fix_spelling_issue channel_id',
-        text: '18_fix_spelling_issue text'
-      })
-      .end((err, res) => {
-        res.should.have.status(200)
-        res.should.be.json
-
-        const responseText = res.body.attachments[0].text
-        responseText.should.have.string('Please choose a difficulty')
-        responseText.should.not.have.string('dificulty')
         done()
       })
   })
