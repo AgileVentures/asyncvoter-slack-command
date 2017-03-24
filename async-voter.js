@@ -91,6 +91,11 @@ module.exports = (app, repository) => {
           'text': 'Hard',
           'type': 'button',
           'value': 'Hard'
+        }, {
+          'name': 'No-opinion',
+          'text': 'No-opinion',
+          'type': 'button',
+          'value': 'No-opinion'
         }]
       }]
     }
@@ -140,6 +145,11 @@ module.exports = (app, repository) => {
           'text': 'Hard',
           'type': 'button',
           'value': 'Hard'
+        }, {
+          'name': 'No-opinion',
+          'text': 'No-opinion',
+          'type': 'button',
+          'value': 'No-opinion'
         }, {
           'name': 'reveal',
           'text': 'Reveal',
