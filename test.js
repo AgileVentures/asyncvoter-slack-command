@@ -123,9 +123,23 @@ describe('Run a voting session', () => {
       })
   })
 
-
 })
 
+
+describe('cancel vote', (done) => {
+
+  it('Cancel should be last action', (done) => {
+    chai.request(app)
+      .post('/commands')
+      .send({ text: '22_allow_user_to_cancel_vote', channel_id: 22 })
+      .end((err, res) => {
+        const actions = res.body.attachments[0].actions
+        const finalAction = actions[actions.length - 1]
+        finalAction.value.should.equals('Cancel')
+        done()
+      })
+  })
+})
 
 describe('Persistence', (done) => {
 

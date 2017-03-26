@@ -91,6 +91,11 @@ module.exports = (app, repository) => {
           'text': 'Hard',
           'type': 'button',
           'value': 'Hard'
+        }, {
+          'name': 'Cancel',
+          'text': 'Cancel last vote',
+          'type': 'button',
+          'value': 'Cancel'
         }]
       }]
     }
