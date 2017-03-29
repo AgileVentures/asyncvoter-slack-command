@@ -7,6 +7,7 @@ const db = require('./index').db
 const chai = require('chai')
 const should = chai.should()
 const chaiHttp = require('chai-http')
+const chaiString = require('chai-string')
 
 const nock = require('nock')
 
@@ -125,22 +126,6 @@ describe('Run a voting session', () => {
 
 })
 
-
-describe('cancel vote', (done) => {
-
-  it('Cancel should be last action', (done) => {
-    chai.request(app)
-      .post('/commands')
-      .send({ text: '22_allow_user_to_cancel_vote', channel_id: 22 })
-      .end((err, res) => {
-        const actions = res.body.attachments[0].actions
-        const finalAction = actions[actions.length - 1]
-        finalAction.value.should.equals('Cancel')
-        done()
-      })
-  })
-})
-
 describe('Persistence', (done) => {
 
   before((done) => {
@@ -176,6 +161,118 @@ describe('Persistence', (done) => {
   })
 
 })
+
+
+describe('Cancel vote', (done) => {
+
+  before((done) => {
+    db.flushdb(done);
+  })
+
+  it('Cancel should be last action', (done) => {
+    chai.request(app)
+      .post('/commands')
+      .send({ text: '22_allow_user_to_cancel_vote', channel_id: 22 })
+      .end((err, res) => {
+        const actions = res.body.attachments[0].actions
+        const finalAction = actions[actions.length - 1]
+        finalAction.value.should.equals('Cancel')
+        done()
+      })
+  })
+
+  var makeVote = function (username, actionValue, next) {
+    chai.request(app)
+      .post('/actions')
+      .send({
+        payload: JSON.stringify({
+          channel: { id: 22 },
+          actions: [{ value: actionValue }],
+          user: { name: username },
+          original_message: { text: '22_allow_user_to_cancel_vote' }
+        })
+      })
+      .end((err, res) => {
+        // if (err) {
+        //   console.log("Error!!!!", err)
+        //   return
+        // }
+        var responseText = res.body.attachments[0].text
+        next(responseText)
+      })
+  }
+
+  it('Making and cancelling a single vote', (done) => {
+    makeVote('Zsuark', 'Simple', function (responseText) {
+      responseText.should.have.string('@Zsuark')
+      responseText.startsWith('1').should.equals(true)
+      makeVote('Zsuark', 'Cancel', function (responseText) {
+        responseText.should.not.have.string('@Zsuark')
+        responseText.startsWith('0').should.equals(true)
+        done()
+      })
+
+    })
+  })
+
+
+  it('Cancelling a vote with other votes present ', (done) => {
+    makeVote('Zsuark', 'Simple', function (responseText) {
+      console.log('**** responseText:', responseText)
+      responseText.should.have.string('1 vote(s) so far')
+      responseText.should.have.string('@Zsuark')
+      makeVote('tansaku', 'Medium', function (responseText) {
+        responseText.should.have.string('2 vote(s) so far')
+        responseText.should.have.string('@tansaku')
+        responseText.should.have.string('@Zsuark')
+        makeVote('arreche', 'Hard', function (responseText) {
+          responseText.should.have.string('3 vote(s) so far')
+          responseText.should.have.string('@tansaku')
+          responseText.should.have.string('@arreche')
+          responseText.should.have.string('@Zsuark')
+          makeVote('Zsuark', 'Cancel', function (responseText) {
+            responseText.should.have.string('2 vote(s) so far')
+            responseText.should.have.string('@tansaku')
+            responseText.should.have.string('@arreche')
+            responseText.should.not.have.string('@Zsuark')
+            done()
+          })
+        })
+      })
+    })
+  })
+
+
+  it('Cancelling without a vote should do nothing', (done) => {
+    makeVote('Zsuark', 'Cancel', function (responseText) {
+      responseText.should.have.string('0 vote(s) so far')
+      done()
+    })
+  })
+
+
+  it('Cancelling a non-existant vote with other votes present ', (done) => {
+    makeVote('tansaku', 'Medium', function (responseText) {
+      responseText.should.have.string('1 vote(s) so far')
+      responseText.should.have.string('@tansaku')
+      makeVote('arreche', 'Hard', function (responseText) {
+        responseText.should.have.string('2 vote(s) so far')
+        responseText.should.have.string('@tansaku')
+        responseText.should.have.string('@arreche')
+        makeVote('Zsuark', 'Cancel', function (responseText) {
+          responseText.should.have.string('2 vote(s) so far')
+          responseText.should.have.string('@tansaku')
+          responseText.should.have.string('@arreche')
+          responseText.should.not.have.string('@Zsuark')
+          done()
+        })
+      })
+    })
+  })
+
+
+})
+
 
 // Zsuark - 20170317 - Is this pprint function ever used?
 const pprint = (json) => JSON.stringify(json, null, '\t')

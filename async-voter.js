@@ -55,6 +55,23 @@ module.exports = (app, repository) => {
 
       if (actions[0].value === 'reveal') {
         res.send(formatResult(text, votes))
+      } else if (actions[0].value === 'Cancel') {
+        const userVotes = votes.filter(function (vote) {
+          return (vote.user.name === user.name)
+        })
+
+        if (userVotes.length < 1) {
+          // No previous votes made
+          res.send(formatRegister(text, votes))
+        } else {
+          const newVotes = votes.filter(function (vote) {
+            return vote.user.name != user.name
+          })
+          repository.set(channel_id, JSON.stringify(newVotes), (err, reply) => {
+            // TODO: Error handling code!!!
+            res.send(formatRegister(text, newVotes))
+          })
+        }
       } else {
         // TODO: Count vote for different voting sessions
         votes.push({ 'user': user, 'vote': actions[0].value })
