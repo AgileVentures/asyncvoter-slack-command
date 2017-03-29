@@ -193,10 +193,10 @@ describe('Cancel vote', (done) => {
         })
       })
       .end((err, res) => {
-        // if (err) {
-        //   console.log("Error!!!!", err)
-        //   return
-        // }
+        if (err) {
+          console.err("Error in makeVote:", err)
+          return err;
+        }
         var responseText = res.body.attachments[0].text
         next(responseText)
       })
