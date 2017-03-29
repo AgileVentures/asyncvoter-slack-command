@@ -49,3 +49,4 @@ You **need** to set up your own Slack **team** and Slack **app** to continue!
 
 - [Getting started with Slack apps](https://api.slack.com/slack-apps)
 - [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
+- [One of Sam's blogs on the background of AsyncVoter](https://medium.com/agileventures/automating-what-to-do-next-7295c62007d9)
