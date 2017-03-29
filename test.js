@@ -205,10 +205,10 @@ describe('Cancel vote', (done) => {
   it('Making and cancelling a single vote', (done) => {
     makeVote('Zsuark', 'Simple', function (responseText) {
       responseText.should.have.string('@Zsuark')
-      responseText.startsWith('1').should.equals(true)
+      responseText.should.have.string('1 vote(s) so far')
       makeVote('Zsuark', 'Cancel', function (responseText) {
         responseText.should.not.have.string('@Zsuark')
-        responseText.startsWith('0').should.equals(true)
+        responseText.should.have.string('0 vote(s) so far')
         done()
       })
 
