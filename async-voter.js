@@ -51,13 +51,14 @@ module.exports = (app, repository) => {
     const channel_id = payload.channel.id
 
     repository.get(channel_id, (err, reply) => {
-      const votes = JSON.parse(reply)
+
+      const votes = JSON.parse(reply) || []
 
       if (actions[0].value === 'reveal') {
         res.send(formatResult(text, votes))
       } else if (actions[0].value === 'Cancel') {
         const userVotes = votes.filter(function (vote) {
-          return (vote.user.name === user.name)
+          return (user.name === vote.user.name)
         })
 
         if (userVotes.length < 1) {
@@ -75,7 +76,6 @@ module.exports = (app, repository) => {
       } else {
         // TODO: Count vote for different voting sessions
         votes.push({ 'user': user, 'vote': actions[0].value })
-
         repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
         })
