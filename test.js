@@ -165,23 +165,7 @@ describe('Persistence', (done) => {
 
 describe('Cancel vote', (done) => {
 
-  before((done) => {
-    db.flushdb(done);
-  })
-
-  it('Cancel should be last action', (done) => {
-    chai.request(app)
-      .post('/commands')
-      .send({ text: '22_allow_user_to_cancel_vote', channel_id: 22 })
-      .end((err, res) => {
-        const actions = res.body.attachments[0].actions
-        const finalAction = actions[actions.length - 1]
-        finalAction.value.should.equals('Cancel')
-        done()
-      })
-  })
-
-  var makeVote = function (username, actionValue, next) {
+  const makeVote = function (username, actionValue, next) {
     chai.request(app)
       .post('/actions')
       .send({
@@ -202,6 +186,35 @@ describe('Cancel vote', (done) => {
       })
   }
 
+  beforeEach((done) => {
+    db.flushdb(() => {
+      let votes = []
+      db.set(1, JSON.stringify(votes), (err, value) => {
+        if (err) {
+          console.err('Error resetting database:', err)
+        }
+        done()
+      })
+    });
+  })
+
+
+
+
+  it('Cancel should be last action', (done) => {
+    chai.request(app)
+      .post('/commands')
+      .send({ text: '22_allow_user_to_cancel_vote', channel_id: 22 })
+      .end((err, res) => {
+        const actions = res.body.attachments[0].actions
+        const finalAction = actions[actions.length - 1]
+        finalAction.value.should.equals('Cancel')
+        done()
+      })
+  })
+
+
+
   it('Making and cancelling a single vote', (done) => {
     makeVote('Zsuark', 'Simple', function (responseText) {
       responseText.should.have.string('@Zsuark')
@@ -218,7 +231,6 @@ describe('Cancel vote', (done) => {
 
   it('Cancelling a vote with other votes present ', (done) => {
     makeVote('Zsuark', 'Simple', function (responseText) {
-      console.log('**** responseText:', responseText)
       responseText.should.have.string('1 vote(s) so far')
       responseText.should.have.string('@Zsuark')
       makeVote('tansaku', 'Medium', function (responseText) {
@@ -248,6 +260,7 @@ describe('Cancel vote', (done) => {
       responseText.should.have.string('0 vote(s) so far')
       done()
     })
+
   })
 
 
