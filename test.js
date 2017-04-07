@@ -6,37 +6,15 @@ const db = require('./index').db
 
 const chai = require('chai')
 const should = chai.should()
-const chaiHttp = require('chai-http')
 
 const nock = require('nock')
 
-chai.use(chaiHttp);
+chai.use(require('chai-http'))
+chai.use(require('chai-string'))
 
 const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
-
-const makeVote = function (username, actionValue, next) {
-  chai.request(app)
-    .post('/actions')
-    .send({
-      payload: JSON.stringify({
-        channel: { id: 22 },
-        actions: [{ value: actionValue }],
-        user: { name: username },
-        original_message: { text: '14_change_my_vote' }
-      })
-    })
-    .end((err, res) => {
-      if (err) {
-        console.err("Error in makeVote:", err)
-        return err;
-      }
-      var responseText = res.body.attachments[0].text
-      next(responseText)
-    })
-}
-
 
 describe('Landing page', () => {
   it('Display Slack button', (done) => {
@@ -144,6 +122,63 @@ describe('Run a voting session', () => {
         done()
       })
   })
+})
+
+
+describe('Run single-user multi-votes', () => {
+
+  before((done) => {
+    // Clear the database and set up the voting session
+    db.flushdb(function () {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: '14_change_my_vote', channel_id: 14 })
+        .end((err, res) => {
+          done()
+        })
+
+    })
+  })
+
+  const makeVote = function (username, actionValue, next) {
+    chai.request(app)
+      .post('/actions')
+      .send({
+        payload: JSON.stringify({
+          channel: { id: 22 },
+          actions: [{ value: actionValue }],
+          user: { name: username },
+          original_message: { text: '14_change_my_vote' }
+        })
+      })
+      .end((err, res) => {
+        if (err) {
+          console.err("Error in makeVote:", err)
+          return err;
+        }
+        var responseText = res.body.attachments[0].text
+        next(responseText)
+      })
+  }
+
+  it('Test duplicates of user', function (done) {
+    makeVote('Zsuark', 'Simple', function (responseText) {
+      responseText.should.startWith('1 vote(s)')
+      responseText.should.have.string('@Zsuark')
+      makeVote('tansaku', 'Medium', function (responseText) {
+        responseText.should.startWith('2 vote(s)')
+        responseText.should.have.string('@Zsuark')
+        responseText.should.have.string('@tansaku')
+        makeVote('Zsuark', 'Medium', function (responseText) {
+          responseText.should.startWith('2 vote(s)')
+          responseText.should.have.entriesCount('@Zsuark', 1)
+          responseText.should.have.entriesCount('@tansaku', 1)
+          done()
+        })
+      })
+    })
+  })
+
 
 
 })
@@ -185,12 +220,5 @@ describe('Persistence', (done) => {
 
 })
 
-describe('Changing vote', (done) => {
-
-  beforeEach((done) => {
-    db.flushdb(done)
-  })
-
-
-
-})
+// Zsuark - 20170317 - Is this pprint function ever used?
+const pprint = (json) => JSON.stringify(json, null, '\t')
