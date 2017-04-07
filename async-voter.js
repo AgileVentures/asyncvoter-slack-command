@@ -51,7 +51,7 @@ module.exports = (app, repository) => {
     const channel_id = payload.channel.id
 
     repository.get(channel_id, (err, reply) => {
-      const votes = JSON.parse(reply) || []
+      const votes = JSON.parse(reply)
 
       if (actions[0].value === 'reveal') {
         res.send(formatResult(text, votes))
