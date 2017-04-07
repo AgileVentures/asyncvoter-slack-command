@@ -16,6 +16,28 @@ const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
 
+const makeVote = function (username, actionValue, next) {
+  chai.request(app)
+    .post('/actions')
+    .send({
+      payload: JSON.stringify({
+        channel: { id: 22 },
+        actions: [{ value: actionValue }],
+        user: { name: username },
+        original_message: { text: '14_change_my_vote' }
+      })
+    })
+    .end((err, res) => {
+      if (err) {
+        console.err("Error in makeVote:", err)
+        return err;
+      }
+      var responseText = res.body.attachments[0].text
+      next(responseText)
+    })
+}
+
+
 describe('Landing page', () => {
   it('Display Slack button', (done) => {
     chai.request(server)
@@ -163,5 +185,12 @@ describe('Persistence', (done) => {
 
 })
 
-// Zsuark - 20170317 - Is this pprint function ever used?
-const pprint = (json) => JSON.stringify(json, null, '\t')
+describe('Changing vote', (done) => {
+
+  beforeEach((done) => {
+    db.flushdb(done)
+  })
+
+
+
+})
