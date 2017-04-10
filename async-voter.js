@@ -99,9 +99,21 @@ module.exports = (app, repository) => {
   }
 
   const formatResult = (text, votes) => {
-    const result = votes.map((vote) => {
-      return `\n@${vote.user.name} ${vote.vote}`
+
+    var uniqueVotes = {}
+    votes.forEach((vote) => {
+      uniqueVotes[vote.user.name] = vote.vote
     })
+
+    // const result = votes.map((vote) => {
+    //   return `\n@${vote.user.name} ${vote.vote}`
+    // })
+
+    var result = []
+    for (key in uniqueVotes) {
+      result.push("\n" + key + " " + uniqueVotes[key])
+    }
+
 
     const msg = {
       'response_type': 'in_channel',

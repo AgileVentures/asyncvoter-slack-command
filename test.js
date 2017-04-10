@@ -145,7 +145,7 @@ describe('Run single-user multi-votes', () => {
       .post('/actions')
       .send({
         payload: JSON.stringify({
-          channel: { id: 22 },
+          channel: { id: 14 },
           actions: [{ value: actionValue }],
           user: { name: username },
           original_message: { text: '14_change_my_vote' }
@@ -178,6 +178,30 @@ describe('Run single-user multi-votes', () => {
       })
     })
   })
+
+  it('Reveal the results', (done) => {
+    chai.request(app)
+      .post('/actions')
+      .send({
+        payload: JSON.stringify({
+          channel: { id: 14 },
+          actions: [{ value: 'reveal' }],
+          user: { name: 'Zsuark' },
+          original_message: { text: '14_change_my_vote' }
+        })
+      })
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.should.be.json
+        const responseText = res.body.text
+        responseText.should.have.string('tansaku Medium')
+        responseText.should.have.string('Zsuark Medium')
+        responseText.should.have.entriesCount('tansaku', 1)
+        responseText.should.have.entriesCount('Zsuark', 1)
+        done()
+      })
+  })
+
 
 
 
