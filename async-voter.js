@@ -114,20 +114,20 @@ module.exports = (app, repository) => {
   const formatRegister = (text, votes) => {
 
     // A set of all users who have voted
-    var userList = new Set()
+    var users = new Set()
 
     votes.forEach(function (vote) {
-      userList.add("@" + vote.user.name)
+      users.add("@" + vote.user.name)
     })
 
     // Convert our set object to an array for convenience
-    userList = [...userList]
+    users = [...users]
 
     const msg = {
       'response_type': 'in_channel',
       'text': text,
       'attachments': [{
-        'text': `${userList.length} vote(s) so far [${userList.join(", ")}]`,
+        'text': `${users.length} vote(s) so far [${users}]`,
         'fallback': 'Woops! Something bad happens!',
         'callback_id': 'voting_session',
         'color': '#3AA3E3',
