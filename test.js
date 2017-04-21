@@ -211,13 +211,15 @@ describe('Run single-user multi-votes', () => {
 describe('Persistence', (done) => {
 
   before((done) => {
+
     db.flushdb(() => {
-      let votes = []
-      votes.push({ 'user': { name: 'User 1' }, 'vote': 'Simple' })
+      let votes = {}
+      votes['User 1'] = 'Simple'
       db.set(1, JSON.stringify(votes), (err, value) => {
         done()
       })
     });
+
   })
 
   it('Record a vote to a restarted session', (done) => {
