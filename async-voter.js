@@ -36,7 +36,7 @@ module.exports = (app, repository) => {
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id, (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id, JSON.stringify([]), (err, reply) => {
+      repository.set(channel_id, JSON.stringify({}), (err, reply) => {
         res.send(formatStart(text))
       })
     })
@@ -47,17 +47,21 @@ module.exports = (app, repository) => {
 
     const actions = payload.actions
     const text = payload.original_message.text
-    const user = payload.user
+      // const user = payload.user
+    const user = payload.user.name
     const channel_id = payload.channel.id
 
     repository.get(channel_id, (err, reply) => {
-      const votes = JSON.parse(reply) || []
+      const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
         res.send(formatResult(text, votes))
       } else {
         // TODO: Count vote for different voting sessions
-        votes.push({ 'user': user, 'vote': actions[0].value })
+
+        votes[user] = actions[0].value
+
+        // votes.push({ 'user': user, 'vote': actions[0].value })
 
         repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
@@ -100,19 +104,13 @@ module.exports = (app, repository) => {
 
   const formatResult = (text, votes) => {
 
-    var uniqueVotes = {}
-    votes.forEach((vote) => {
-      uniqueVotes[vote.user.name] = vote.vote
-    })
-
     // const result = votes.map((vote) => {
     //   return `\n@${vote.user.name} ${vote.vote}`
     // })
 
-    var result = []
-    for (key in uniqueVotes) {
-      result.push("\n" + key + " " + uniqueVotes[key])
-    }
+    const result = Object.keys(votes).map((user) => {
+      return `\n@${user} ${votes[user]}`
+    })
 
 
     const msg = {
@@ -126,14 +124,10 @@ module.exports = (app, repository) => {
   const formatRegister = (text, votes) => {
 
     // A set of all users who have voted
-    var users = new Set()
-
-    votes.forEach(function (vote) {
-      users.add("@" + vote.user.name)
+    const users = Object.keys(votes).map((user) => {
+      return "@" + user
     })
 
-    // Convert our set object to an array for convenience
-    users = [...users]
 
     const msg = {
       'response_type': 'in_channel',
