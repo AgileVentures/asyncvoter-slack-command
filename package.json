@@ -32,5 +32,9 @@
     "nock": "^9.0.2",
     "nodemon": "^1.11.0",
     "nyc": "^10.1.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/AgileVentures/asyncvoter-slack-command.git"
   }
 }
