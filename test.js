@@ -161,25 +161,25 @@ describe('Run single-user multi-votes', () => {
       })
   }
 
-  it('Test duplicates of user', function (done) {
+  it('Test double voting by user', function (done) {
     makeVote('Zsuark', 'Simple', function (responseText) {
       responseText.should.startWith('1 vote(s)')
-      responseText.should.have.string('@Zsuark')
+      responseText.should.have.entriesCount('Zsuark', 1)
       makeVote('tansaku', 'Medium', function (responseText) {
         responseText.should.startWith('2 vote(s)')
-        responseText.should.have.string('@Zsuark')
-        responseText.should.have.string('@tansaku')
+        responseText.should.have.entriesCount('Zsuark', 1)
+        responseText.should.have.entriesCount('tansaku', 1)
         makeVote('Zsuark', 'Medium', function (responseText) {
           responseText.should.startWith('2 vote(s)')
-          responseText.should.have.entriesCount('@Zsuark', 1)
-          responseText.should.have.entriesCount('@tansaku', 1)
+          responseText.should.have.entriesCount('Zsuark', 1)
+          responseText.should.have.entriesCount('tansaku', 1)
           done()
         })
       })
     })
   })
 
-  it('Reveal the results', (done) => {
+  it('Confirm the results', (done) => {
     chai.request(app)
       .post('/actions')
       .send({

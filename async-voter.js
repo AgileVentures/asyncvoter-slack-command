@@ -47,7 +47,6 @@ module.exports = (app, repository) => {
 
     const actions = payload.actions
     const text = payload.original_message.text
-      // const user = payload.user
     const user = payload.user.name
     const channel_id = payload.channel.id
 
@@ -60,8 +59,6 @@ module.exports = (app, repository) => {
         // TODO: Count vote for different voting sessions
 
         votes[user] = actions[0].value
-
-        // votes.push({ 'user': user, 'vote': actions[0].value })
 
         repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
@@ -104,14 +101,9 @@ module.exports = (app, repository) => {
 
   const formatResult = (text, votes) => {
 
-    // const result = votes.map((vote) => {
-    //   return `\n@${vote.user.name} ${vote.vote}`
-    // })
-
     const result = Object.keys(votes).map((user) => {
       return `\n@${user} ${votes[user]}`
     })
-
 
     const msg = {
       'response_type': 'in_channel',
@@ -148,6 +140,7 @@ module.exports = (app, repository) => {
           'text': 'Medium',
           'type': 'button',
           'value': 'Medium'
+
         }, {
           'name': 'Hard',
           'text': 'Hard',
