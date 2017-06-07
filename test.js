@@ -6,11 +6,11 @@ const db = require('./index').db
 
 const chai = require('chai')
 const should = chai.should()
-const chaiHttp = require('chai-http')
 
 const nock = require('nock')
 
-chai.use(chaiHttp);
+chai.use(require('chai-http'))
+chai.use(require('chai-string'))
 
 const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
@@ -124,6 +124,87 @@ describe('Run a voting session', () => {
         done()
       })
   })
+})
+
+
+describe('Run single-user multi-votes', () => {
+
+  before((done) => {
+    // Clear the database and set up the voting session
+    db.flushdb(function () {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: '14_change_my_vote', channel_id: 14 })
+        .end((err, res) => {
+          done()
+        })
+
+    })
+  })
+
+  const makeVote = function (username, actionValue, next) {
+    chai.request(app)
+      .post('/actions')
+      .send({
+        payload: JSON.stringify({
+          channel: { id: 14 },
+          actions: [{ value: actionValue }],
+          user: { name: username },
+          original_message: { text: '14_change_my_vote' }
+        })
+      })
+      .end((err, res) => {
+        if (err) {
+          console.err("Error in makeVote:", err)
+          return err;
+        }
+        var responseText = res.body.attachments[0].text
+        next(responseText)
+      })
+  }
+
+  it('Test double voting by user', function (done) {
+    makeVote('Zsuark', 'Simple', function (responseText) {
+      responseText.should.startWith('1 vote(s)')
+      responseText.should.have.entriesCount('Zsuark', 1)
+      makeVote('tansaku', 'Medium', function (responseText) {
+        responseText.should.startWith('2 vote(s)')
+        responseText.should.have.entriesCount('Zsuark', 1)
+        responseText.should.have.entriesCount('tansaku', 1)
+        makeVote('Zsuark', 'Medium', function (responseText) {
+          responseText.should.startWith('2 vote(s)')
+          responseText.should.have.entriesCount('Zsuark', 1)
+          responseText.should.have.entriesCount('tansaku', 1)
+          done()
+        })
+      })
+    })
+  })
+
+  it('Confirm the results', (done) => {
+    chai.request(app)
+      .post('/actions')
+      .send({
+        payload: JSON.stringify({
+          channel: { id: 14 },
+          actions: [{ value: 'reveal' }],
+          user: { name: 'Zsuark' },
+          original_message: { text: '14_change_my_vote' }
+        })
+      })
+      .end((err, res) => {
+        res.should.have.status(200)
+        res.should.be.json
+        const responseText = res.body.text
+        responseText.should.have.string('tansaku Medium')
+        responseText.should.have.string('Zsuark Medium')
+        responseText.should.have.entriesCount('tansaku', 1)
+        responseText.should.have.entriesCount('Zsuark', 1)
+        done()
+      })
+  })
+
+
 
 
 })
@@ -132,13 +213,15 @@ describe('Run a voting session', () => {
 describe('Persistence', (done) => {
 
   before((done) => {
+
     db.flushdb(() => {
-      let votes = []
-      votes.push({ 'user': { name: 'User 1' }, 'vote': 'Simple' })
+      let votes = {}
+      votes['User 1'] = 'Simple'
       db.set(1, JSON.stringify(votes), (err, value) => {
         done()
       })
     });
+
   })
 
   it('Record a vote to a restarted session', (done) => {
