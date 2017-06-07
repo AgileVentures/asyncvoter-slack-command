@@ -74,6 +74,7 @@ describe('Run a voting session', () => {
         actions[0].value.should.equals('Simple')
         actions[1].value.should.equals('Medium')
         actions[2].value.should.equals('Hard')
+        actions[3].value.should.equals('No-opinion')
         done()
       })
   })
@@ -97,7 +98,8 @@ describe('Run a voting session', () => {
         res.body.attachments[0].actions[0].value.should.equals('Simple')
         res.body.attachments[0].actions[1].value.should.equals('Medium')
         res.body.attachments[0].actions[2].value.should.equals('Hard')
-        res.body.attachments[0].actions[3].value.should.equals('reveal')
+        res.body.attachments[0].actions[3].value.should.equals('No-opinion')
+        res.body.attachments[0].actions[4].value.should.equals('reveal')
 
         done()
       })
