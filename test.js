@@ -1,8 +1,9 @@
 require('dotenv').config({ path: './.env.example' })
 
-const app = require('./index').app
-const server = require('./index').server
-const db = require('./index').db
+const index = require('./index')
+const app = index.app
+const server = index.server
+const db = index.db
 
 const chai = require('chai')
 const should = chai.should()
