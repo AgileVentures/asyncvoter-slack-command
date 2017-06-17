@@ -1,6 +1,9 @@
 // redis-persistence.js
 'use strict'
 
+require('dotenv').config()
+
+
 const db = (require('redis'))
   .createClient(process.env.REDIS_URL || 'redis://localhost:6379')
 

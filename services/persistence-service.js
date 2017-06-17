@@ -8,29 +8,20 @@
 // Format for persistence layer objects
 
 
-// const redis = require('./redis-persistence')
-
 // TODO: create function to figure out which store to initialise
 // and inject.
 
-// const immutable = require('immutable')
-
-// const repoMap = immutable.Map({
-//   redis: require('redis'),
-// })
 
 
-module.exports = (x) => {
-  if (!x || x.length == 0 || !x.store) {
-    console.log('No data store specified - using Redis')
-  }
+module.exports = (store, options) => {
 
-  if (x.store !== 'redis') {
-    console.log('No other persistence layers available - using Redis')
-  }
+  // TODO: Warning - is this a dangerous type of reflection?!
+  if (store && typeof store == 'string' && store.length > 0)
+    return require('./' + store + '-persistence');
 
   // return getPersistenceStore(x.store || 'redis');
   //return redis
-  return require('./mongo-persistence')
+  console.warn('Not sure what persistence to use - defaulting back to redis')
+  return require('./redis-persistence')
 
 }

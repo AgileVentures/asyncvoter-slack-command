@@ -3,7 +3,9 @@ require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 
-const db = require('./services/persistence-service.js')({ store: 'redis' })
+
+const dbService = process.env.DB_SERVICE || 'redis'
+const db = require('./services/persistence-service.js')(dbService)
 
 const PORT = process.env.PORT || 4390
 

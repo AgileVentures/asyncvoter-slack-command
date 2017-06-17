@@ -1,13 +1,15 @@
 // mongo-persistence.js
 'use strict'
 
-const mongoHost = process.env.MONGO_HOST || 'localhost'
+require('dotenv').config()
+
+const mongoUrl = process.env.MONGO_URL || 'localhost'
 const mongoDb = process.env.MONGO_DB || 'asyncvoter'
 
-const db = require('monk')(mongoHost + '/' + mongoDb)
-db.then(() => {
-  console.log
-('Connected correctly to MongoDB server')
+const mongoFullUrl = mongoUrl + (mongoUrl.endsWith('/') ? '' : '/') + mongoDb
+
+const db = require('monk')(mongoFullUrl).then(() => {
+  console.log('Connected correctly to Mongo server')
 })
 
 const channelVotes = db.get('channel_votes')
