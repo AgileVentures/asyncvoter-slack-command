@@ -9,7 +9,6 @@
 
 
 // const redis = require('./redis-persistence')
-const redis = require('./redis-persistence')
 
 // TODO: create function to figure out which store to initialise
 // and inject.
@@ -31,6 +30,7 @@ module.exports = (x) => {
   }
 
   // return getPersistenceStore(x.store || 'redis');
-  return redis
+  //return redis
+  return require('./mongo-persistence')
 
 }
