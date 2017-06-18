@@ -1,4 +1,4 @@
-// redis-persistence.js
+// services/persistence/redis.js
 'use strict'
 
 require('dotenv').config()

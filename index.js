@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 
 
 const dbService = process.env.DB_SERVICE || 'redis'
-const db = require('./services/persistence-service.js')(dbService)
+const db = require('./services/persistence.js')(dbService)
 
 const PORT = process.env.PORT || 4390
 
