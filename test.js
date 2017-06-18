@@ -17,11 +17,20 @@ const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
 
-describe('Landing page', () => {
-  it('Display Slack button', (done) => {
+// All of these 
+// Note - arrow functions should not be used with mocha
+// 
+describe('Landing page', function () {
+  it('Display Slack button', function (done) {
+
+    // TODO: Promise!
     chai.request(server)
       .get('/')
       .end((err, res) => {
+
+        // TODO: Was missing - there should be no error
+        should.not.exist(err)
+
         res.should.have.status(200)
         res.should.be.html
         res.text.should.have.string(client_id)
@@ -31,8 +40,8 @@ describe('Landing page', () => {
   })
 })
 
-describe('Install app', () => {
-  it('Authorize the app', (done) => {
+describe('Install app', function () {
+  it('Authorize the app', function (done) {
 
     // Given: External requests are mocked
     nock('https://slack.com')
@@ -40,6 +49,7 @@ describe('Install app', () => {
       .query({ code, client_id, client_secret })
       .reply(200)
 
+    // TODO: Promise!
     chai.request(app)
       .get('/oauth')
       .query({ code, client_id, client_secret })
@@ -51,13 +61,13 @@ describe('Install app', () => {
   })
 })
 
-describe('Run a voting session', () => {
+describe('Run a voting session', function () {
 
-  before((done) => {
+  before(function (done) {
     db.flushdb(done);
   })
 
-  it('Start a voting session', (done) => {
+  it('Start a voting session', function (done) {
     chai.request(app)
       .post('/commands')
       .send({ text: 'Feature 1', channel_id: 1 })
@@ -80,7 +90,7 @@ describe('Run a voting session', () => {
       })
   })
 
-  it('Record a vote', (done) => {
+  it('Record a vote', function (done) {
     chai.request(app)
       .post('/actions')
       .send({
@@ -143,6 +153,7 @@ describe('Run single-user multi-votes', () => {
     })
   })
 
+  // TODO: makeVote must return a promise!
   const makeVote = function (username, actionValue, next) {
     chai.request(app)
       .post('/actions')
@@ -165,6 +176,7 @@ describe('Run single-user multi-votes', () => {
   }
 
   it('Test double voting by user', function (done) {
+    // TODO: makeVote needs to return a promise!
     makeVote('Zsuark', 'Simple', function (responseText) {
       responseText.should.startWith('1 vote(s)')
       responseText.should.have.entriesCount('Zsuark', 1)
@@ -182,7 +194,8 @@ describe('Run single-user multi-votes', () => {
     })
   })
 
-  it('Confirm the results', (done) => {
+  it('Confirm the results', function (done) {
+    // TODO: Promise!
     chai.request(app)
       .post('/actions')
       .send({
@@ -211,10 +224,11 @@ describe('Run single-user multi-votes', () => {
 })
 
 
-describe('Persistence', (done) => {
+describe('Persistence', function (done) {
 
-  before((done) => {
+  before(function (done) {
 
+    // TODO: Promise!
     db.flushdb(() => {
       let votes = {}
       votes['User 1'] = 'Simple'
@@ -225,7 +239,9 @@ describe('Persistence', (done) => {
 
   })
 
-  it('Record a vote to a restarted session', (done) => {
+  it('Record a vote to a restarted session', function (done) {
+
+    // TODO: Promise!
     chai.request(app)
       .post('/actions')
       .send({
@@ -248,6 +264,3 @@ describe('Persistence', (done) => {
   })
 
 })
-
-// Zsuark - 20170317 - Is this pprint function ever used?
-const pprint = (json) => JSON.stringify(json, null, '\t')

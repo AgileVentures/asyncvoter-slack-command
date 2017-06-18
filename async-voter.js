@@ -3,40 +3,54 @@ const request = require('request')
 const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 
-module.exports = (app, repository) => {
+module.exports = (app, db) => {
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
   })
 
-  app.get('/oauth', (req, res) => {
-    if (!req.query.code) {
+  // callback chaining - let's favour composition
+  app.get('/oauth', (req, res, next) => {
+    if (req.query.code) next()
+    else {
       res.status(500)
       res.send({ 'Error': "Looks like we're not getting code." })
-    } else {
-      request({
-        url: 'https://slack.com/api/oauth.access',
-        qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
-        method: 'GET'
-      }, (error, response, body) => {
-        if (error) {
-          res.status(500)
-          res.send({ 'Error': error })
-        } else {
-          res.redirect('/')
-        }
-      })
     }
+  }, (req, res, next) => {
+
+    // Candidate for promise
+    // Need to be able to wrap the request object in a promise,
+    // or use a promise friendly version
+    request({
+      url: 'https://slack.com/api/oauth.access',
+      qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
+      method: 'GET'
+    }, (error, response, body) => {
+      if (error) {
+        res.status(500)
+        res.send({ 'Error': error })
+      } else {
+        res.redirect('/')
+      }
+    })
+
   })
 
+
+  // /commands seems to delete the votes on the channel, and then start
+  // a new vote
+  // - I think this cannot be renamed due to slack
+  // I don't think we should be deleting!
   app.post('/commands', (req, res) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
 
+    // db.* functions should return promises
+    // TODO: Promise'ify
     // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id, (err, reply) => {
+    db.del(channel_id, (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id, JSON.stringify({}), (err, reply) => {
+      db.set(channel_id, JSON.stringify({}), (err, reply) => {
         res.send(formatStart(text))
       })
     })
@@ -50,7 +64,8 @@ module.exports = (app, repository) => {
     const user = payload.user.name
     const channel_id = payload.channel.id
 
-    repository.get(channel_id, (err, reply) => {
+    // TODO: Promise'ify
+    db.get(channel_id, (err, reply) => {
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
@@ -60,7 +75,7 @@ module.exports = (app, repository) => {
 
         votes[user] = actions[0].value
 
-        repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
+        db.set(channel_id, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
         })
       }
