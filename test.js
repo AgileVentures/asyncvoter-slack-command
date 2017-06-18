@@ -17,25 +17,22 @@ const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
 
-// All of these 
-// Note - arrow functions should not be used with mocha
-// 
+// Promises library
+const Promise = require("bluebird")
+
 describe('Landing page', function () {
-  it('Display Slack button', function (done) {
+  it('Display Slack button', function () {
 
-    // TODO: Promise!
-    chai.request(server)
+    return chai.request(server)
       .get('/')
-      .end((err, res) => {
-
-        // TODO: Was missing - there should be no error
-        should.not.exist(err)
-
+      .send()
+      .then((res) => {
         res.should.have.status(200)
         res.should.be.html
         res.text.should.have.string(client_id)
-
-        done()
+      })
+      .catch((err) => {
+        throw err
       })
   })
 })
