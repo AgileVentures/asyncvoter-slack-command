@@ -16,32 +16,55 @@ const db = Promise.promisifyAll(dbNoPromises)
 
 
 
-
-// const setupVote = (channel_id, label) => {
-// 	db.get
-// }
-
-
-// TODO: should I be lift'ing here instead?
-
-const del = (channel_id, handler) => {
-  return db.del(channel_id, handler)
+// Return type - promise
+// Returns a string indicating success on promise fulfillment 
+const setupVote = (channel_id, label) => {
+  // TODO: Do we need to check if the last
+  // vote is finished yet?
+  return db.setAsync("current_vote::" + channel_id, label)
+    .then(response => {
+      return new Promise((resolve, reject) => {
+        const message = "CHANNEL: '" + channel_id +
+          "', NEW VOTING SESSION: '" + label + "'";
+        resolve(message)
+      })
+    })
 }
 
-const set = (channel_id, value, handler) => {
-  return db.set(channel_id, value, handler)
+// Return type - promise
+// Helper to get current voting session label
+function getCurrentVotingSession(channel_id) {
+  return db.getAsync("current_vote::" + channel_id)
+}
+
+// Return type - promise
+// Returns a string indicating success on promise fulfillment 
+const giveVote = (channel_id, user, voteString) => {
+  return getCurrentVotingSession(channel_id)
+    .then(voteLabel => {
+      return db.hsetAsync("votes::" + channel_id + voteLabel, user, voteString)
+    })
+    .then(results => {
+      return ("Vote cast on " + channel_id +
+        ". Details: " + JSON.stringify(results))
+    })
+}
+
+// Return type - promise
+// Upon fulfillment gives an object containing user => vote mappings
+const getVotes = (channel_id) => {
+  return getCurrentVotingSession(channel_id)
+    .then(voteLabel => {
+      return db.hgetallAsync("votes::" + channel_id + voteLabel)
+    })
 }
 
 
-const get = (channel_id, done) => {
-  return db.get(channel_id, done)
-}
-
-const flushdb = (done) => {
-  return db.flushdb(done)
+const flushdbAsync = () => {
+  return db.flushdbAsync()
 }
 
 
 
-module.exports = { del, set, flushdb, get, db }
-  // module.exports = { setupVote, vote, getVotes, flushdb }
+// module.exports = { del, set, flushdb, get, db }
+module.exports = { setupVote, giveVote, getVotes, flushdbAsync }

@@ -37,83 +37,70 @@ module.exports = (app, db) => {
   })
 
 
-  // /commands seems to delete the votes on the channel, and then start
-  // a new vote
-  // - I think this cannot be renamed due to slack
-  // I don't think we should be deleting!
+  // /commands starts a new vote on the given channel
   app.post('/commands', (req, res, next) => {
+
     const text = req.body.text
     const channel_id = req.body.channel_id
 
-    db.db.del(channel_id, (err, reply) => {
-      db.db.hset(channel_id, "text", text, (err, reply) => {
-        if (err) next(err);
-        else {
-          res.send(formatStart(text))
-        }
+    db.setupVote(channel_id, text)
+      .then(result => {
+        res.send(formatStart(text))
       })
-    })
-
-    // db.* functions should return promises
-    // TODO: Promise'ify
-    // TODO: Close previous session. One session per channel is allowed.
-    // db.del(channel_id, (err, reply) => {
-    //   // TODO: Save unique voting session. Team + Channel
-    //   db.set(channel_id, JSON.stringify({}), (err, reply) => {
-    //     res.send(formatStart(text))
-    //   })
-    // })
+      .catch(e => {
+        next(e)
+      })
   })
 
+
+  // /actions receives an action regarding an existing
+  // voting session
+  // An action may either be:
+  // A vote being case OR a request to reveal votes
   app.post('/actions', (req, res, next) => {
+    // Reveal votes
     const payload = JSON.parse(req.body.payload)
+
     req.jsonPayload = payload
     const text = payload.original_message.text
-
     const action = payload.actions[0].value
-    if (action !== 'reveal') next();
-    else {
+    if (action == 'reveal') {
       const channel_id = payload.channel.id
-      db.db.hgetall(channel_id, (err, votes) => {
-        res.send(formatResult(text, votes))
-      })
-    }
+
+      db.getVotes(channel_id)
+        .then(votes => {
+          res.send(formatResult(text, votes))
+        })
+        .catch(err => {
+          next(err)
+        })
+
+    } else next();
   }, (req, res, next) => {
+    // We have received a vote
 
     const payload = req.jsonPayload
     const text = payload.original_message.text
     const user = payload.user.name
     const channel_id = payload.channel.id
-    const action = payload.actions[0].value
+    const vote = payload.actions[0].value
 
-    db.db.hset(channel_id, user, action, (err, reply) => {
-      if (err) next(err);
-      else db.db.hgetall(channel_id, (err, votes) => {
+    db.giveVote(channel_id, user, vote)
+      .then(result => {
+        return db.getVotes(channel_id)
+      })
+      .then(votes => {
         res.send(formatRegister(text, votes))
       })
-    })
+      .catch(err => {
+        next(err)
+      })
 
-    // TODO: Promise'ify
-    // Problem - this function results in lost update
-    // db.get(channel_id, (err, reply) => {
-    //   const votes = JSON.parse(reply) || {}
 
-    //   if (actions[0].value === 'reveal') {
-    //     res.send(formatResult(text, votes))
-    //   } else {
-    //     // TODO: Count vote for different voting sessions
-
-    //     votes[user] = actions[0].value
-
-    //     db.set(channel_id, JSON.stringify(votes), (err, reply) => {
-    //       res.send(formatRegister(text, votes))
-    //     })
-    //   }
-    // })
   })
 
-  const formatStart = (text) => {
-    const msg = {
+  function formatStart(text) {
+    return {
       'response_type': 'in_channel',
       'text': `<!here> ASYNC VOTE on "${text}"`,
       'attachments': [{
@@ -145,11 +132,9 @@ module.exports = (app, db) => {
         }]
       }]
     }
-
-    return msg
   }
 
-  const formatResult = (text, votes) => {
+  function formatResult(text, votes) {
 
     const result = Object.keys(votes).filter(x => x !== 'text').map((user) => {
       return `\n@${user} ${votes[user]}`
@@ -163,19 +148,24 @@ module.exports = (app, db) => {
     return msg
   }
 
-  const formatRegister = (text, votes) => {
+  function formatRegister(text, votes) {
 
     // A set of all users who have voted
-    const users = Object.keys(votes).filter(x => x !== 'text').map((user) => {
+    const userList = Object.keys(votes).filter(x => x !== 'text').map((user) => {
       return "@" + user
     })
+    const voteCount = userList.length
+    const users = userList.join(", ")
+
+    const voteText = "" + voteCount + " vote" + ((voteCount == 1) ? "" : "s") +
+      " so far [ " + users + " ]"
 
 
-    const msg = {
+    return {
       'response_type': 'in_channel',
       'text': text,
       'attachments': [{
-        'text': `${users.length} vote(s) so far [ ${users} ]`,
+        'text': voteText,
         'fallback': 'Woops! Something bad happens!',
         'callback_id': 'voting_session',
         'color': '#3AA3E3',
@@ -216,7 +206,5 @@ module.exports = (app, db) => {
         }]
       }]
     }
-
-    return msg
   }
 }
