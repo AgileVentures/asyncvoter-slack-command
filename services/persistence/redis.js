@@ -3,13 +3,24 @@
 
 require('dotenv').config()
 
+const Promise = require("bluebird")
 
-const db = (require('redis'))
+const dbNoPromises = require('redis')
   .createClient(process.env.REDIS_URL || 'redis://localhost:6379')
 
-db.on('error', function (err) {
+dbNoPromises.on('error', function (err) {
   console.log('Error ' + err)
 })
+
+const db = Promise.promisifyAll(dbNoPromises)
+
+
+
+
+// const setupVote = (channel_id, label) => {
+// 	db.get
+// }
+
 
 // TODO: should I be lift'ing here instead?
 
@@ -30,4 +41,7 @@ const flushdb = (done) => {
   return db.flushdb(done)
 }
 
-module.exports = { del, set, flushdb, get }
+
+
+module.exports = { del, set, flushdb, get, db }
+  // module.exports = { setupVote, vote, getVotes, flushdb }

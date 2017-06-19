@@ -41,45 +41,75 @@ module.exports = (app, db) => {
   // a new vote
   // - I think this cannot be renamed due to slack
   // I don't think we should be deleting!
-  app.post('/commands', (req, res) => {
+  app.post('/commands', (req, res, next) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
+
+    db.db.del(channel_id, (err, reply) => {
+      db.db.hset(channel_id, "text", text, (err, reply) => {
+        if (err) next(err);
+        else {
+          res.send(formatStart(text))
+        }
+      })
+    })
 
     // db.* functions should return promises
     // TODO: Promise'ify
     // TODO: Close previous session. One session per channel is allowed.
-    db.del(channel_id, (err, reply) => {
-      // TODO: Save unique voting session. Team + Channel
-      db.set(channel_id, JSON.stringify({}), (err, reply) => {
-        res.send(formatStart(text))
-      })
-    })
+    // db.del(channel_id, (err, reply) => {
+    //   // TODO: Save unique voting session. Team + Channel
+    //   db.set(channel_id, JSON.stringify({}), (err, reply) => {
+    //     res.send(formatStart(text))
+    //   })
+    // })
   })
 
-  app.post('/actions', (req, res) => {
+  app.post('/actions', (req, res, next) => {
     const payload = JSON.parse(req.body.payload)
+    req.jsonPayload = payload
+    const text = payload.original_message.text
 
-    const actions = payload.actions
+    const action = payload.actions[0].value
+    if (action !== 'reveal') next();
+    else {
+      const channel_id = payload.channel.id
+      db.db.hgetall(channel_id, (err, votes) => {
+        res.send(formatResult(text, votes))
+      })
+    }
+  }, (req, res, next) => {
+
+    const payload = req.jsonPayload
     const text = payload.original_message.text
     const user = payload.user.name
     const channel_id = payload.channel.id
+    const action = payload.actions[0].value
+
+    db.db.hset(channel_id, user, action, (err, reply) => {
+      if (err) next(err);
+      else db.db.hgetall(channel_id, (err, votes) => {
+        res.send(formatRegister(text, votes))
+      })
+    })
 
     // TODO: Promise'ify
-    db.get(channel_id, (err, reply) => {
-      const votes = JSON.parse(reply) || {}
+    // Problem - this function results in lost update
+    // db.get(channel_id, (err, reply) => {
+    //   const votes = JSON.parse(reply) || {}
 
-      if (actions[0].value === 'reveal') {
-        res.send(formatResult(text, votes))
-      } else {
-        // TODO: Count vote for different voting sessions
+    //   if (actions[0].value === 'reveal') {
+    //     res.send(formatResult(text, votes))
+    //   } else {
+    //     // TODO: Count vote for different voting sessions
 
-        votes[user] = actions[0].value
+    //     votes[user] = actions[0].value
 
-        db.set(channel_id, JSON.stringify(votes), (err, reply) => {
-          res.send(formatRegister(text, votes))
-        })
-      }
-    })
+    //     db.set(channel_id, JSON.stringify(votes), (err, reply) => {
+    //       res.send(formatRegister(text, votes))
+    //     })
+    //   }
+    // })
   })
 
   const formatStart = (text) => {
@@ -121,7 +151,7 @@ module.exports = (app, db) => {
 
   const formatResult = (text, votes) => {
 
-    const result = Object.keys(votes).map((user) => {
+    const result = Object.keys(votes).filter(x => x !== 'text').map((user) => {
       return `\n@${user} ${votes[user]}`
     })
 
@@ -136,7 +166,7 @@ module.exports = (app, db) => {
   const formatRegister = (text, votes) => {
 
     // A set of all users who have voted
-    const users = Object.keys(votes).map((user) => {
+    const users = Object.keys(votes).filter(x => x !== 'text').map((user) => {
       return "@" + user
     })
 
@@ -145,7 +175,7 @@ module.exports = (app, db) => {
       'response_type': 'in_channel',
       'text': text,
       'attachments': [{
-        'text': `${users.length} vote(s) so far [${users}]`,
+        'text': `${users.length} vote(s) so far [ ${users} ]`,
         'fallback': 'Woops! Something bad happens!',
         'callback_id': 'voting_session',
         'color': '#3AA3E3',

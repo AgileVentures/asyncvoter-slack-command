@@ -20,25 +20,27 @@ const code = 1;
 // Promises library
 const Promise = require("bluebird")
 
+const throwErr = err => {
+  throw err;
+}
+
 describe('Landing page', function () {
   it('Display Slack button', function () {
 
     return chai.request(server)
       .get('/')
       .send()
-      .then((res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.html
         res.text.should.have.string(client_id)
       })
-      .catch((err) => {
-        throw err
-      })
+      .catch(throwErr)
   })
 })
 
 describe('Install app', function () {
-  it('Authorize the app', function (done) {
+  it('Authorize the app', function () {
 
     // Given: External requests are mocked
     nock('https://slack.com')
@@ -50,13 +52,14 @@ describe('Install app', function () {
     chai.request(app)
       .get('/oauth')
       .query({ code, client_id, client_secret })
-      .end((err, res) => {
+      .send()
+      .then(res => {
         res.should.redirect
-
-        done()
       })
+      .catch(throwErr)
   })
 })
+
 
 describe('Run a voting session', function () {
 
@@ -64,11 +67,12 @@ describe('Run a voting session', function () {
     db.flushdb(done);
   })
 
-  it('Start a voting session', function (done) {
+  it('Start a voting session', function () {
     chai.request(app)
       .post('/commands')
       .send({ text: 'Feature 1', channel_id: 1 })
-      .end((err, res) => {
+      .then(res => {
+
         res.should.have.status(200)
         res.should.be.json
         res.should.have.property('text')
@@ -83,12 +87,12 @@ describe('Run a voting session', function () {
         actions[1].value.should.equals('Medium')
         actions[2].value.should.equals('Hard')
         actions[3].value.should.equals('No-opinion')
-        done()
       })
+      .catch(throwErr)
   })
 
-  it('Record a vote', function (done) {
-    chai.request(app)
+  it('Record a vote', function () {
+    return chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
@@ -98,7 +102,7 @@ describe('Run a voting session', function () {
           original_message: { text: 'Feature 1' }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
         res.body.attachments[0].text.should.have.string('1 vote')
@@ -108,12 +112,11 @@ describe('Run a voting session', function () {
         res.body.attachments[0].actions[2].value.should.equals('Hard')
         res.body.attachments[0].actions[3].value.should.equals('No-opinion')
         res.body.attachments[0].actions[4].value.should.equals('reveal')
-
-        done()
       })
+      .catch(throwErr)
   })
 
-  it('Reveal the results', (done) => {
+  it('Reveal the results', () => {
     chai.request(app)
       .post('/actions')
       .send({
@@ -124,20 +127,22 @@ describe('Run a voting session', function () {
           original_message: { text: 'Feature 1' }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
         res.body.text.should.have.string('Medium')
-
-        done()
       })
+      .catch(throwErr)
   })
 })
 
 
 describe('Run single-user multi-votes', () => {
 
+  // TODO: Should use promises???
   before((done) => {
+
+    // TODO: db methods need to be made into promises!
     // Clear the database and set up the voting session
     db.flushdb(function () {
       chai.request(app)
@@ -150,9 +155,33 @@ describe('Run single-user multi-votes', () => {
     })
   })
 
-  // TODO: makeVote must return a promise!
-  const makeVote = function (username, actionValue, next) {
-    chai.request(app)
+  // // Makes a promise to the response text of a vote cast via HTTP
+  // function makeVote(username, actionValue) {
+
+  //   return new Promise(function (resolve, reject) {
+  //     chai.request(app)
+  //       .post('/actions')
+  //       .send({
+  //         payload: JSON.stringify({
+  //           channel: { id: 14 },
+  //           actions: [{ value: actionValue }],
+  //           user: { name: username },
+  //           original_message: { text: '14_change_my_vote' }
+  //         })
+  //       })
+  //       .then(res => {
+  //         console.log("+_+_+_+_+_+_+_ " + res.body.attachments[0].text)
+  //         resolve(res.body.attachments[0].text)
+  //       })
+  //       .catch(err => { reject(err) })
+
+  //   })
+  // }
+
+  // Makes a promise to the response text of a vote cast via HTTP
+  function makeVote(username, actionValue) {
+
+    return chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
@@ -162,48 +191,125 @@ describe('Run single-user multi-votes', () => {
           original_message: { text: '14_change_my_vote' }
         })
       })
-      .end((err, res) => {
-        if (err) {
-          console.err("Error in makeVote:", err)
-          return err;
-        }
-        var responseText = res.body.attachments[0].text
-        next(responseText)
-      })
+
   }
 
+
   it('Test double voting by user', function (done) {
-    // TODO: makeVote needs to return a promise!
-    makeVote('Zsuark', 'Simple', function (responseText) {
-      responseText.should.startWith('1 vote(s)')
-      responseText.should.have.entriesCount('Zsuark', 1)
-      makeVote('tansaku', 'Medium', function (responseText) {
-        responseText.should.startWith('2 vote(s)')
+
+    makeVote('Zsuark', 'Simple')
+      .end((err, res) => {
+        if (err) throwErr(err);
+
+        let responseText = res.body.attachments[0].text
+
+        responseText.should.startWith('1 vote(s)')
         responseText.should.have.entriesCount('Zsuark', 1)
-        responseText.should.have.entriesCount('tansaku', 1)
-        makeVote('Zsuark', 'Medium', function (responseText) {
-          responseText.should.startWith('2 vote(s)')
-          responseText.should.have.entriesCount('Zsuark', 1)
-          responseText.should.have.entriesCount('tansaku', 1)
-          done()
-        })
+        makeVote('tansaku', 'Medium')
+          .end((err, res) => {
+            if (err) throwErr(err);
+
+            let responseText = res.body.attachments[0].text
+
+            responseText.should.startWith('2 vote(s)')
+            responseText.should.have.entriesCount('Zsuark', 1)
+            responseText.should.have.entriesCount('tansaku', 1)
+
+            makeVote('Zsuark', 'Medium')
+              .end((err, res) => {
+                if (err) throwErr(err);
+
+                let responseText = res.body.attachments[0].text
+
+                responseText.should.startWith('2 vote(s)')
+                responseText.should.have.entriesCount('Zsuark', 1)
+                responseText.should.have.entriesCount('tansaku', 1)
+
+                done()
+              })
+          })
       })
-    })
+
+
+    // Promise.all([
+    //   makeVote('Zsuark', 'Simple'),
+    //   makeVote('tansaku', 'Medium'),
+    //   makeVote('Zsuark', 'Medium')
+    // ]).then(res => {
+    //   // console.log("****  res:", res)
+    //   res.length.should.equal(3)
+    //   let responseTextList = res.map(x => x.body.attachments[0].text)
+    //   console.log("-----++++++++------", responseTextList)
+    // }).catch(throwErr)
+
+
+    // makeVote('Zsuark', 'Simple')
+    //   .then(responseText => {
+    //     responseText.should.startWith('1 vote(s)')
+    //     responseText.should.have.entriesCount('Zsuark', 1)
+    //   })
+    //   .catch(throwErr)
+
+    // makeVote('tansaku', 'Medium')
+    //   .then(responseText => {
+    //     responseText.should.startWith('2 vote(s)')
+    //     responseText.should.have.entriesCount('Zsuark', 1)
+    //     responseText.should.have.entriesCount('tansaku', 1)
+    //     makeVote('Zsuark', 'Medium')
+    //       .then(responseText => {
+    //         responseText.should.startWith('2 vote(s)')
+    //         responseText.should.have.entriesCount('Zsuark', 1)
+    //         responseText.should.have.entriesCount('tansaku', 1)
+    //       })
+    //   })
+    //   .catch(throwErr)
+
+
+    // makeVote('Zsuark', 'Medium')
+    //   .then(responseText => {
+    //     responseText.should.startWith('2 vote(s)')
+    //     responseText.should.have.entriesCount('Zsuark', 1)
+    //     responseText.should.have.entriesCount('tansaku', 1)
+    //   })
+
+
+
+
+
+
+    // // TODO: makeVote needs to return a promise!
+    // makeVote('Zsuark', 'Simple', function (responseText) {
+    //   responseText.should.startWith('1 vote(s)')
+    //   responseText.should.have.entriesCount('Zsuark', 1)
+    //   makeVote('tansaku', 'Medium', function (responseText) {
+    //     responseText.should.startWith('2 vote(s)')
+    //     responseText.should.have.entriesCount('Zsuark', 1)
+    //     responseText.should.have.entriesCount('tansaku', 1)
+    //     makeVote('Zsuark', 'Medium', function (responseText) {
+    //       responseText.should.startWith('2 vote(s)')
+    //       responseText.should.have.entriesCount('Zsuark', 1)
+    //       responseText.should.have.entriesCount('tansaku', 1)
+    //       done()
+    //     })
+    //   })
+    // })
+
   })
 
-  it('Confirm the results', function (done) {
+  // it('Confirm the results', function (done) {
+  it('Confirm the results', function () {
     // TODO: Promise!
-    chai.request(app)
+    return chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
           channel: { id: 14 },
           actions: [{ value: 'reveal' }],
           user: { name: 'Zsuark' },
-          original_message: { text: '14_change_my_vote' }
+          original_message: { "text": '14_change_my_vote' }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
         const responseText = res.body.text
@@ -211,12 +317,51 @@ describe('Run single-user multi-votes', () => {
         responseText.should.have.string('Zsuark Medium')
         responseText.should.have.entriesCount('tansaku', 1)
         responseText.should.have.entriesCount('Zsuark', 1)
-        done()
       })
+      .catch(throwErr)
+
+    // .end((err, res) => {
+    //   console.log("AAA###AAA")
+    //   if (err) throwErr(err);
+
+    //   console.log("*@*@*@*@*@**@*@*@*@*")
+    //   res.should.have.status(200)
+    //   res.should.be.json
+    //     // const responseText = res.body.text
+    //     // console.log('text:', responseText)
+    //     // responseText.should.have.string('tansaku Medium')
+    //     // responseText.should.have.string('Zsuark Medium')
+    //     // responseText.should.have.entriesCount('tansaku', 1)
+    //     // responseText.should.have.entriesCount('Zsuark', 1)
+    //   done()
+    // })
+
+    // .then(res => {
+
+    //   //   console.log("-----++++++  B  ++++++-----")
+
+    //   // myChai.then(res => {
+
+    //   console.log("-----++++++  C  ++++++-----")
+
+    //   res.should.have.status(200)
+    //   res.should.be.json
+    //   const responseText = res.body.text
+    //   console.log('text:', responseText)
+    //   responseText.should.have.string('tansaku Medium')
+    //   responseText.should.have.string('Zsuark Medium')
+    //   responseText.should.have.entriesCount('tansaku', 1)
+    //   responseText.should.have.entriesCount('Zsuark', 1)
+    //   done()
+    // })
+    // .catch(err => {
+    //   console.log("-----++++++  D - ERROR!  ++++++-----")
+    //   done(err)
+    // })
+    // myChai.end((err, res) => {
+
+
   })
-
-
-
 
 })
 
@@ -228,9 +373,11 @@ describe('Persistence', function (done) {
     // TODO: Promise!
     db.flushdb(() => {
       let votes = {}
-      votes['User 1'] = 'Simple'
-      db.set(1, JSON.stringify(votes), (err, value) => {
-        done()
+        // votes['User 1'] = 'Simple'
+      db.db.hmset(1, "text", "test channel 1", "User 1", "Simple", (err, value) => {
+        // db.set(1, JSON.stringify(votes), (err, value) => {
+        if (err) done(err);
+        else done();
       })
     });
 
@@ -255,7 +402,6 @@ describe('Persistence', function (done) {
         res.body.attachments[0].text.should.have.string('2 vote')
         res.body.attachments[0].text.should.have.string('User 1')
         res.body.attachments[0].text.should.have.string('User 2')
-
         done()
       })
   })
