@@ -1,8 +1,7 @@
-require('dotenv').config({ path: './.env.example' })
+require('dotenv').config({ path: './.env.test' })
 
 const index = require('./server')
 const app = index.app
-const server = index.server
 const db = index.db
 
 const chai = require('chai')
@@ -17,14 +16,12 @@ const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
 
-const throwErr = err => {
-  throw err;
-}
+const handleError = err => Promise.reject(err)
 
 describe('Landing page', function () {
   it('Display Slack button', function () {
 
-    return chai.request(server)
+    return chai.request(app)
       .get('/')
       .send()
       .then(res => {
@@ -33,9 +30,7 @@ describe('Landing page', function () {
         res.text.should.have.string(client_id)
         return Promise.resolve(res)
       })
-      .catch(err => {
-        return Promise.reject(err)
-      })
+      .catch(handleError)
 
   })
 })
@@ -56,7 +51,7 @@ describe('Install app', function () {
       .then(res => {
         res.should.redirect
       })
-      .catch(throwErr)
+      .catch(handleError)
   })
 })
 
@@ -89,7 +84,7 @@ describe('Run a voting session', function () {
         actions[2].value.should.equals('Hard')
         actions[3].value.should.equals('No-opinion')
       })
-      .catch(throwErr)
+      .catch(handleError)
   })
 
   it('Record a vote', function () {
@@ -104,6 +99,7 @@ describe('Run a voting session', function () {
         })
       })
       .then(res => {
+
         res.should.have.status(200)
         res.should.be.json
         res.body.attachments[0].text.should.have.string('1 vote')
@@ -113,8 +109,9 @@ describe('Run a voting session', function () {
         res.body.attachments[0].actions[2].value.should.equals('Hard')
         res.body.attachments[0].actions[3].value.should.equals('No-opinion')
         res.body.attachments[0].actions[4].value.should.equals('reveal')
+
       })
-      .catch(throwErr)
+      .catch(handleError)
   })
 
   it('Reveal the results', () => {
@@ -133,7 +130,7 @@ describe('Run a voting session', function () {
         res.should.be.json
         res.body.text.should.have.string('Medium')
       })
-      .catch(throwErr)
+      .catch(handleError)
   })
 })
 
@@ -244,11 +241,9 @@ describe('Persistence', function () {
         return db.setupVote(channelId, voteLabel)
       })
       .then(result => {
-        console.log("&&&&& setting up voting")
         return db.giveVote(channelId, "User 1", "Simple")
       })
       .then(result => {
-        console.log("&&&&& completed added vote")
         return Promise.resolve(result)
       })
   })

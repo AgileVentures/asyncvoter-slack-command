@@ -1,9 +1,25 @@
+require('dotenv').config()
+
+
 const request = require('request')
 
 const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 
-module.exports = (app, db) => {
+const express = require('express')
+const bodyParser = require('body-parser')
+const app = express()
+
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
+
+
+const defaultPort = process.env.PORT || 4390
+
+module.exports = (db, configOptions) => {
+
+  const port = (configOptions) ? configOptions.port || defaultPort : defaultPort
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
@@ -17,10 +33,6 @@ module.exports = (app, db) => {
       res.send({ 'Error': "Looks like we're not getting code." })
     }
   }, (req, res, next) => {
-
-    // Candidate for promise
-    // Need to be able to wrap the request object in a promise,
-    // or use a promise friendly version
     request({
       url: 'https://slack.com/api/oauth.access',
       qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
@@ -56,156 +68,162 @@ module.exports = (app, db) => {
   // /actions receives an action regarding an existing
   // voting session
   // An action may either be:
-  // A vote being case OR a request to reveal votes
-  app.post('/actions', (req, res, next) => {
-    // Reveal votes
-    const payload = JSON.parse(req.body.payload)
+  // A vote being cast OR a request to reveal votes
+  app.post('/actions',
+    (req, res, next) => {
+      // setup for our processing
+      const payload = JSON.parse(req.body.payload)
+      req.vote_label = payload.original_message.text
+      req.user = payload.user.name
+      req.channel_id = payload.channel.id
+      req.action = payload.actions[0].value
+      next()
+    },
+    (req, res, next) => {
+      // Reveal votes
 
-    req.jsonPayload = payload
-    const text = payload.original_message.text
-    const action = payload.actions[0].value
-    if (action == 'reveal') {
-      const channel_id = payload.channel.id
+      if (req.action == 'reveal') {
+        db.getVotes(req.channel_id)
+          .then(votes => {
+            res.send(formatResult(req.vote_label, votes))
+          })
+          .catch(err => {
+            next(err)
+          })
+      } else next();
 
-      db.getVotes(channel_id)
+    },
+    (req, res, next) => {
+      // We have received a vote
+      const voteLabel = req.vote_label
+      const vote = req.action
+      db.giveVote(req.channel_id, req.user, vote)
+        .then(result => {
+          return db.getVotes(req.channel_id)
+        })
         .then(votes => {
-          res.send(formatResult(text, votes))
+          res.send(formatRegister(voteLabel, votes))
         })
         .catch(err => {
           next(err)
         })
+    }
+  )
 
-    } else next();
-  }, (req, res, next) => {
-    // We have received a vote
-
-    const payload = req.jsonPayload
-    const text = payload.original_message.text
-    const user = payload.user.name
-    const channel_id = payload.channel.id
-    const vote = payload.actions[0].value
-
-    db.giveVote(channel_id, user, vote)
-      .then(result => {
-        return db.getVotes(channel_id)
-      })
-      .then(votes => {
-        res.send(formatRegister(text, votes))
-      })
-      .catch(err => {
-        next(err)
-      })
-
-
+  app.listen(port, (err, res) => {
+    if (err) throw err;
+    else console.log('Listening on port ' + port)
   })
 
-  function formatStart(text) {
-    return {
-      'response_type': 'in_channel',
-      'text': `<!here> ASYNC VOTE on "${text}"`,
-      'attachments': [{
-        'text': 'Please choose a difficulty',
-        'fallback': 'Woops! Something bad happens!',
-        'callback_id': 'voting_session',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [{
-          'name': 'Simple',
-          'text': 'Simple',
-          'type': 'button',
-          'value': 'Simple'
-        }, {
-          'name': 'Medium',
-          'text': 'Medium',
-          'type': 'button',
-          'value': 'Medium'
-        }, {
-          'name': 'Hard',
-          'text': 'Hard',
-          'type': 'button',
-          'value': 'Hard'
-        }, {
-          'name': 'No-opinion',
-          'text': 'No-opinion',
-          'type': 'button',
-          'value': 'No-opinion'
-        }]
+  return app
+}
+
+
+function formatStart(text) {
+  return {
+    'response_type': 'in_channel',
+    'text': `<!here> ASYNC VOTE on "${text}"`,
+    'attachments': [{
+      'text': 'Please choose a difficulty',
+      'fallback': 'Woops! Something bad happens!',
+      'callback_id': 'voting_session',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': [{
+        'name': 'Simple',
+        'text': 'Simple',
+        'type': 'button',
+        'value': 'Simple'
+      }, {
+        'name': 'Medium',
+        'text': 'Medium',
+        'type': 'button',
+        'value': 'Medium'
+      }, {
+        'name': 'Hard',
+        'text': 'Hard',
+        'type': 'button',
+        'value': 'Hard'
+      }, {
+        'name': 'No-opinion',
+        'text': 'No-opinion',
+        'type': 'button',
+        'value': 'No-opinion'
       }]
-    }
+    }]
+  }
+}
+
+function formatResult(text, votes) {
+
+  const result = Object.keys(votes).map((user) => {
+    return `\n@${user} ${votes[user]}`
+  })
+
+  const msg = {
+    'response_type': 'in_channel',
+    'text': `${text} \n${result}`
   }
 
-  function formatResult(text, votes) {
+  return msg
+}
 
-    const result = Object.keys(votes).map((user) => {
-      return `\n@${user} ${votes[user]}`
-    })
+function formatRegister(text, votes) {
 
-    const msg = {
-      'response_type': 'in_channel',
-      'text': `${text} \n${result}`
-    }
+  // A set of all users who have voted
+  const userList = Object.keys(votes).map((user) => {
+    return "@" + user
+  })
+  const voteCount = userList.length
+  const users = userList.join(", ")
 
-    return msg
-  }
-
-  function formatRegister(text, votes) {
-
-    // A set of all users who have voted
-    const userList = Object.keys
-(votes).map((user) => {
-      return "@" + user
-    })
-    const voteCount = userList.length
-    const users = userList.join(", ")
-
-    const voteText = "" + voteCount + " vote" + ((voteCount == 1) ? "" : "s") +
-      " so far [ " + users + " ]"
+  const voteText = "" + voteCount + " vote" + ((voteCount == 1) ? "" : "s") +
+    " so far [ " + users + " ]"
 
 
-    return {
-      'response_type': 'in_channel',
-      'text': text,
-      'attachments': [{
-        'text': voteText,
-        'fallback': 'Woops! Something bad happens!',
-        'callback_id': 'voting_session',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [{
-          'name': 'Simple',
-          'text': 'Simple',
-          'type': 'button',
-          'value': 'Simple'
-        }, {
-          'name': 'Medium',
-          'text': 'Medium',
-          'type': 'button',
-          'value': 'Medium'
+  return {
+    'response_type': 'in_channel',
+    'text': text,
+    'attachments': [{
+      'text': voteText,
+      'fallback': 'Woops! Something bad happens!',
+      'callback_id': 'voting_session',
+      'color': '#3AA3E3',
+      'attachment_type': 'default',
+      'actions': [{
+        'name': 'Simple',
+        'text': 'Simple',
+        'type': 'button',
+        'value': 'Simple'
+      }, {
+        'name': 'Medium',
+        'text': 'Medium',
+        'type': 'button',
+        'value': 'Medium'
 
-        }, {
-          'name': 'Hard',
-          'text': 'Hard',
-          'type': 'button',
-          'value': 'Hard'
-        }, {
-          'name': 'No-opinion',
-          'text': 'No-opinion',
-          'type': 'button',
-          'value': 'No-opinion'
-        }, {
-          'name': 'reveal',
-          'text': 'Reveal',
-          'style': 'danger',
-          'type': 'button',
-          'value': 'reveal',
-          'confirm': {
-            'title': 'Are you sure?',
-            'text': 'This will reveal all the votes',
-            'ok_text': 'Yes',
-            'dismiss_text': 'No'
-          }
-        }]
+      }, {
+        'name': 'Hard',
+        'text': 'Hard',
+        'type': 'button',
+        'value': 'Hard'
+      }, {
+        'name': 'No-opinion',
+        'text': 'No-opinion',
+        'type': 'button',
+        'value': 'No-opinion'
+      }, {
+        'name': 'reveal',
+        'text': 'Reveal',
+        'style': 'danger',
+        'type': 'button',
+        'value': 'reveal',
+        'confirm': {
+          'title': 'Are you sure?',
+          'text': 'This will reveal all the votes',
+          'ok_text': 'Yes',
+          'dismiss_text': 'No'
+        }
       }]
-    }
+    }]
   }
 }
