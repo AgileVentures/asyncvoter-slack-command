@@ -1,7 +1,8 @@
 require('dotenv').config()
 
 
-const dbService = process.env.DB_SERVICE || 'redis'
+// const dbService = process.env.DB_SERVICE || 'redis'
+const dbService = process.env.DB_SERVICE || 'mongo'
 const db = require('./services/persistence.js')(dbService)
 
 

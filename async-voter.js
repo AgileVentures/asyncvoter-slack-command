@@ -136,7 +136,7 @@ module.exports = (app, db) => {
 
   function formatResult(text, votes) {
 
-    const result = Object.keys(votes).filter(x => x !== 'text').map((user) => {
+    const result = Object.keys(votes).map((user) => {
       return `\n@${user} ${votes[user]}`
     })
 
@@ -151,7 +151,8 @@ module.exports = (app, db) => {
   function formatRegister(text, votes) {
 
     // A set of all users who have voted
-    const userList = Object.keys(votes).filter(x => x !== 'text').map((user) => {
+    const userList = Object.keys
+(votes).map((user) => {
       return "@" + user
     })
     const voteCount = userList.length

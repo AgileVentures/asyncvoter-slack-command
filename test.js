@@ -59,15 +59,10 @@ describe('Install app', function () {
 
 describe('Run a voting session', function () {
 
-  before(function (done) {
-    db.flushdbAsync()
-      .then(result => {
-        done()
-      })
-      .catch(err => {
-        done(err)
-      })
-  })
+  before(
+    function () {
+      return db.flushdbAsync()
+    })
 
   it('Start a voting session', function () {
     chai.request(app)
@@ -144,19 +139,16 @@ describe('Run single-user multi-votes', function () {
   const voteLabel = '14_change_my_vote'
   const channelId = '14_test_channel'
 
-  before(done => {
+  before(function () {
     // Clear the database and set up the voting session
-    db.flushdbAsync()
+    return db.flushdbAsync()
       .then(res => {
-        chai.request(app)
+        return chai.request(app)
           .post('/commands')
           .send({ text: voteLabel, channel_id: channelId })
       })
       .then(res => {
-        done()
-      })
-      .catch(err => {
-        done(err)
+        return Promise.resolve(res)
       })
   })
 
