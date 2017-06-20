@@ -9,7 +9,7 @@ const dbNoPromises = require('redis')
   .createClient(process.env.REDIS_URL || 'redis://localhost:6379')
 
 dbNoPromises.on('error', function (err) {
-  console.log('Error ' + err)
+  console.error('Error: ' + err)
 })
 
 const db = Promise.promisifyAll(dbNoPromises)

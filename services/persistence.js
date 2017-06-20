@@ -8,8 +8,6 @@
 
 module.exports = (store, options) => {
 
-  console.log("persistence - store:", store)
-
   // TODO: Warning - is this a dangerous type of reflection?!
   // Error catching??
   if (store && typeof store == 'string' && store.length > 0)

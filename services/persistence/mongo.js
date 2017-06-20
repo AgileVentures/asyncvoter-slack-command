@@ -69,6 +69,9 @@ function flushdbAsync() {
     .then(results => {
       return votes.remove({})
     })
+    .then(results => {
+      return Promise.resolve(results)
+    })
 }
 
 module.exports = { setupVote, giveVote, getVotes, flushdbAsync }

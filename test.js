@@ -1,6 +1,6 @@
 require('dotenv').config({ path: './.env.example' })
 
-const index = require('./index')
+const index = require('./server')
 const app = index.app
 const server = index.server
 const db = index.db
@@ -31,8 +31,12 @@ describe('Landing page', function () {
         res.should.have.status(200)
         res.should.be.html
         res.text.should.have.string(client_id)
+        return Promise.resolve(res)
       })
-      .catch(throwErr)
+      .catch(err => {
+        return Promise.reject(err)
+      })
+
   })
 })
 
@@ -169,7 +173,7 @@ describe('Run single-user multi-votes', function () {
   }
 
 
-  it('Test double voting by user', function (done) {
+  it('Test double voting by user', function () {
 
     makeVote('Zsuark', 'Simple')
       .then(result => {
@@ -191,15 +195,15 @@ describe('Run single-user multi-votes', function () {
         responseText.should.startWith('2 votes')
         responseText.should.have.entriesCount('Zsuark', 1)
         responseText.should.have.entriesCount('tansaku', 1)
-        done()
+        return Promise.resolve(result)
       })
       .catch(err => {
-        done(err)
+        return Promise.reject(err)
       })
   })
 
 
-  it('Confirm the results', function (done) {
+  it('Confirm the results', function () {
     let request = chai.request(app)
       .post('/actions')
       .send({
@@ -218,10 +222,10 @@ describe('Run single-user multi-votes', function () {
         responseText.should.have.string('Zsuark Medium')
         responseText.should.have.entriesCount('tansaku', 1)
         responseText.should.have.entriesCount('Zsuark', 1)
-        done()
+        return Promise.resolve(res)
       })
       .catch(err => {
-        done(err)
+        return Promise.reject(err)
       })
 
   })
@@ -232,30 +236,34 @@ describe('Run single-user multi-votes', function () {
 describe('Persistence', function () {
 
   const channelId = "testChannel1"
+  const voteLabel = "Test Vote"
 
   before(function () {
     db.flushdbAsync()
       .then(result => {
-        return db.setupVote(channelId, "Test Vote")
+        return db.setupVote(channelId, voteLabel)
       })
       .then(result => {
+        console.log("&&&&& setting up voting")
         return db.giveVote(channelId, "User 1", "Simple")
       })
-      .then(result => {})
-      .catch(throwErr)
+      .then(result => {
+        console.log("&&&&& completed added vote")
+        return Promise.resolve(result)
+      })
   })
 
 
-  it('Record a vote to a restarted session', function (done) {
+  it('Record a vote to a restarted session', function () {
 
-    chai.request(app)
+    return chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
           channel: { id: channelId },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 2' },
-          original_message: { text: 'Feature 1' }
+          original_message: { text: voteLabel }
         })
       })
       .then(res => {
@@ -272,7 +280,7 @@ describe('Persistence', function () {
               channel: { id: channelId },
               actions: [{ value: 'reveal' }],
               user: { name: 'User 1' },
-              original_message: { text: 'Feature 1' }
+              original_message: { text: voteLabel }
             })
           })
       })
@@ -282,10 +290,10 @@ describe('Persistence', function () {
         const responseText = res.body.text
         responseText.should.have.string('User 1 Simple')
         responseText.should.have.string('User 2 Medium')
-        done()
+        return Promise.resolve(res)
       })
       .catch(err => {
-        done(err)
+        return Promise.reject(err)
       })
   })
 

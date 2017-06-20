@@ -15,7 +15,7 @@ app.use(express.static('public'))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-require('./async-voter')(app, db)
+require('./services/slack-http')(app, db)
 
 const PORT = process.env.PORT || 4390
 const server = app.listen(PORT, () => {
