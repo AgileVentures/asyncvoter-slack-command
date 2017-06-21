@@ -2,7 +2,7 @@
 'use strict'
 
 const config = require('config').get("persistence.redis")
-const redisUrl = "redis://" + config.host + '/' + config.port
+const redisUrl = "redis://" + config.host + ':' + config.port
 
 
 const Promise = require("bluebird")
@@ -23,6 +23,7 @@ redisSynchronous.on('ready', function () {
 redisSynchronous.on('error', function (err) {
   console.log("Redis connection error:", err)
 })
+
 
 
 module.exports = function (options) {
