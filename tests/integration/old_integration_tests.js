@@ -1,6 +1,6 @@
-require('dotenv').config({ path: './.env.test' })
+const config = require('config')
 
-const index = require('./server')
+const index = require('../../server')
 const app = index.app
 const db = index.db
 
@@ -12,8 +12,8 @@ const nock = require('nock')
 chai.use(require('chai-http'))
 chai.use(require('chai-string'))
 
-const client_id = process.env.CLIENT_ID
-const client_secret = process.env.CLIENT_SECRET
+const client_id = config.get("slack-http").client_id
+const client_secret = config.get("slack-http").client_secret
 const code = 1;
 
 const handleError = err => Promise.reject(err)
@@ -60,7 +60,7 @@ describe('Run a voting session', function () {
 
   before(
     function () {
-      return db.flushdbAsync()
+      return db.deleteAllData()
     })
 
   it('Start a voting session', function () {
@@ -142,7 +142,7 @@ describe('Run single-user multi-votes', function () {
 
   before(function () {
     // Clear the database and set up the voting session
-    return db.flushdbAsync()
+    return db.deleteAllData()
       .then(res => {
         return chai.request(app)
           .post('/commands')
@@ -170,7 +170,7 @@ describe('Run single-user multi-votes', function () {
   }
 
 
-  it('Test double voting by user', function () {
+  it('Test double voting by user', function (done) {
 
     makeVote('Zsuark', 'Simple')
       .then(result => {
@@ -192,15 +192,17 @@ describe('Run single-user multi-votes', function () {
         responseText.should.startWith('2 votes')
         responseText.should.have.entriesCount('Zsuark', 1)
         responseText.should.have.entriesCount('tansaku', 1)
+        done()
         return Promise.resolve(result)
       })
       .catch(err => {
+        done(err)
         return Promise.reject(err)
       })
   })
 
 
-  it('Confirm the results', function () {
+  it('Confirm the results', function (done) {
     let request = chai.request(app)
       .post('/actions')
       .send({
@@ -219,9 +221,11 @@ describe('Run single-user multi-votes', function () {
         responseText.should.have.string('Zsuark Medium')
         responseText.should.have.entriesCount('tansaku', 1)
         responseText.should.have.entriesCount('Zsuark', 1)
+        done()
         return Promise.resolve(res)
       })
       .catch(err => {
+        done(err)
         return Promise.reject(err)
       })
 
@@ -236,7 +240,7 @@ describe('Persistence', function () {
   const voteLabel = "Test Vote"
 
   before(function () {
-    db.flushdbAsync()
+    db.deleteAllData()
       .then(result => {
         return db.setupVote(channelId, voteLabel)
       })

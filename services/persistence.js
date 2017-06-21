@@ -3,19 +3,23 @@
 
 // Factory for persistence layer modules
 // Gives support for multiple persistence stores
-// Persistence layer modules must export { del, set, flushdb, get }
+// Persistence layer modules are facades to the actual persistence objects & functions
+// A persistence object must contain: { setupVote, giveVote, getVotes, deleteAllData }
 
 
 module.exports = (store, options) => {
 
-  // TODO: Warning - is this a dangerous type of reflection?!
-  // Error catching??
-  if (store && typeof store == 'string' && store.length > 0)
-    return require('./persistence/' + store);
+  const storeDefined = store && typeof store == 'string' && store.length > 0
 
-  // return getPersistenceStore(x.store || 'redis');
-  //return redis
-  console.warn('Not sure what persistence to use - defaulting back to redis')
-  return require('./persistence/redis')
+  if (!storeDefined) console.warn('Not sure what persistence to use - defaulting back to redis')
+
+  const moduleName = './persistence/' + (storeDefined ? store : 'redis')
+
+  const persistence = require(moduleName)(options)
+
+  // NO destruction of non-test databases
+  if (process.env.NODE_ENV != 'test') delete persistence.deleteAllData
+
+  return persistence
 
 }

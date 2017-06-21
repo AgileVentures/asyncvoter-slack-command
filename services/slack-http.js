@@ -1,10 +1,8 @@
-require('dotenv').config()
+// require('dotenv').config()
 
 
 const request = require('request')
 
-const clientId = process.env.CLIENT_ID
-const clientSecret = process.env.CLIENT_SECRET
 
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -14,8 +12,11 @@ app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
+const config = require('config').get('slack-http')
+const clientId = config.client_id
+const clientSecret = config.client_secret
 
-const defaultPort = process.env.PORT || 4390
+const defaultPort = config.port
 
 module.exports = (db, configOptions) => {
 
