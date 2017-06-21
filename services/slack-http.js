@@ -19,6 +19,8 @@ const clientSecret = config.client_secret
 
 const defaultPort = config.port
 
+const formatMessage = require('./slack-http/outboundMessaging')
+
 module.exports = (db, configOptions) => {
 
   const port = (configOptions) ? configOptions.port || defaultPort : defaultPort
@@ -59,7 +61,7 @@ module.exports = (db, configOptions) => {
 
     db.setupVote(channel_id, text)
       .then(result => {
-        res.send(formatStart(text))
+        res.send(formatMessage.start(text))
       })
       .catch(e => {
         next(e)
@@ -87,7 +89,7 @@ module.exports = (db, configOptions) => {
       if (req.action == 'reveal') {
         db.getVotes(req.channel_id)
           .then(votes => {
-            res.send(formatResult(req.vote_label, votes))
+            res.send(formatMessage.reveal(req.vote_label, votes))
           })
           .catch(err => {
             next(err)
@@ -104,7 +106,7 @@ module.exports = (db, configOptions) => {
           return db.getVotes(req.channel_id)
         })
         .then(votes => {
-          res.send(formatRegister(voteLabel, votes))
+          res.send(formatMessage.receiveVote(voteLabel, votes))
         })
         .catch(err => {
           next(err)
@@ -112,120 +114,12 @@ module.exports = (db, configOptions) => {
     }
   )
 
-  app.listen(port, (err, res) => {
-    if (err) throw err;
-    else console.log('Listening on port ' + port)
+  app.server = app.listen(port, (err, res) => {
+    if (err) {
+      console.err("Cannot start Slack http service:", err)
+      throw err;
+    } else console.log('Slack http service listening on port:', port)
   })
 
   return app
-}
-
-
-function formatStart(text) {
-  return {
-    'response_type': 'in_channel',
-    'text': `<!here> ASYNC VOTE on "${text}"`,
-    'attachments': [{
-      'text': 'Please choose a difficulty',
-      'fallback': 'Woops! Something bad happens!',
-      'callback_id': 'voting_session',
-      'color': '#3AA3E3',
-      'attachment_type': 'default',
-      'actions': [{
-        'name': 'Simple',
-        'text': 'Simple',
-        'type': 'button',
-        'value': 'Simple'
-      }, {
-        'name': 'Medium',
-        'text': 'Medium',
-        'type': 'button',
-        'value': 'Medium'
-      }, {
-        'name': 'Hard',
-        'text': 'Hard',
-        'type': 'button',
-        'value': 'Hard'
-      }, {
-        'name': 'No-opinion',
-        'text': 'No-opinion',
-        'type': 'button',
-        'value': 'No-opinion'
-      }]
-    }]
-  }
-}
-
-function formatResult(text, votes) {
-
-  const result = Object.keys(votes).map((user) => {
-    return `\n@${user} ${votes[user]}`
-  })
-
-  const msg = {
-    'response_type': 'in_channel',
-    'text': `${text} \n${result}`
-  }
-
-  return msg
-}
-
-function formatRegister(text, votes) {
-
-  // A set of all users who have voted
-  const userList = Object.keys(votes).map((user) => {
-    return "@" + user
-  })
-  const voteCount = userList.length
-  const users = userList.join(", ")
-
-  const voteText = "" + voteCount + " vote" + ((voteCount == 1) ? "" : "s") +
-    " so far [ " + users + " ]"
-
-
-  return {
-    'response_type': 'in_channel',
-    'text': text,
-    'attachments': [{
-      'text': voteText,
-      'fallback': 'Woops! Something bad happens!',
-      'callback_id': 'voting_session',
-      'color': '#3AA3E3',
-      'attachment_type': 'default',
-      'actions': [{
-        'name': 'Simple',
-        'text': 'Simple',
-        'type': 'button',
-        'value': 'Simple'
-      }, {
-        'name': 'Medium',
-        'text': 'Medium',
-        'type': 'button',
-        'value': 'Medium'
-
-      }, {
-        'name': 'Hard',
-        'text': 'Hard',
-        'type': 'button',
-        'value': 'Hard'
-      }, {
-        'name': 'No-opinion',
-        'text': 'No-opinion',
-        'type': 'button',
-        'value': 'No-opinion'
-      }, {
-        'name': 'reveal',
-        'text': 'Reveal',
-        'style': 'danger',
-        'type': 'button',
-        'value': 'reveal',
-        'confirm': {
-          'title': 'Are you sure?',
-          'text': 'This will reveal all the votes',
-          'ok_text': 'Yes',
-          'dismiss_text': 'No'
-        }
-      }]
-    }]
-  }
 }
