@@ -1,4 +1,4 @@
-const config = require('config')
+const config = require('config').get("slack-http")
 
 const index = require('../../server')
 const app = index.app
@@ -12,8 +12,8 @@ const nock = require('nock')
 chai.use(require('chai-http'))
 chai.use(require('chai-string'))
 
-const client_id = config.get("slack-http").client_id
-const client_secret = config.get("slack-http").client_secret
+const client_id = config.client_id
+const client_secret = config.client_secret
 const code = 1;
 
 const handleError = err => Promise.reject(err)
