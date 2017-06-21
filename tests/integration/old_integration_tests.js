@@ -1,9 +1,3 @@
-// const index = require('../../server')
-// const app = index.app
-// const db = index.db
-
-console.log("&&&&&&&& process.env.NODE_ENV:", process.env.NODE_ENV)
-
 const servicesDir = process.cwd() + "/services/"
 const db = require(servicesDir + "persistence")()
 const app = require(servicesDir + "slack-http")(db, { port: 5555 })
