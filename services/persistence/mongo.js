@@ -6,6 +6,8 @@ const Promise = require("bluebird")
 const config = require('config').get("persistence.mongo")
 const mongoUrl = config.host + ':' + config.port + '/' + config.database
 
+const name = "mongo://" + config.host + ":" + config.port + '/' + config.database
+
 const mongo = require('monk')(mongoUrl)
 
 // mongo.then(result => {
@@ -16,7 +18,11 @@ const mongo = require('monk')(mongoUrl)
 const votingSessions = mongo.get('voting_sessions')
 const votes = mongo.get('votes')
 
-module.exports = (options) => {
+module.exports = () => {
+
+  function getName() {
+    return name
+  }
 
   // TODO: Should we raise an error if a voting session has already happened?
   function setupVote(channelId, label) {
@@ -66,5 +72,5 @@ module.exports = (options) => {
       .then(results => Promise.resolve(results))
   }
 
-  return { setupVote, giveVote, getVotes, deleteAllData }
+  return { setupVote, giveVote, getVotes, deleteAllData, getName }
 }
