@@ -4,17 +4,14 @@
 const Promise = require("bluebird")
 
 const config = require('config').get("persistence.mongo")
-const mongoUrl = config.host + '/' + config.port
+const mongoUrl = config.host + ':' + config.port + '/' + config.database
 
 const mongo = require('monk')(mongoUrl)
-  .then((result) => {
-    console.log('Connected correctly to Mongo server:', result)
-  })
-  .catch(err => {
-    console.log("Unable to connect to Mongo Server")
-    console.err("Error connecting to Mongo:", err)
-  })
 
+// mongo.then(result => {
+//   console.log('Connected correctly to Mongo server:', result)
+//   return Promise.resolve(result)
+// })
 
 const votingSessions = mongo.get('voting_sessions')
 const votes = mongo.get('votes')
@@ -62,14 +59,11 @@ module.exports = (options) => {
 
   // WARNING: DELETES EVERYTHING!!!
   function deleteAllData() {
-
     return votingSessions.remove({})
       .then(results => {
         return votes.remove({})
       })
-      .then(results => {
-        return Promise.resolve(results)
-      })
+      .then(results => Promise.resolve(results))
   }
 
   return { setupVote, giveVote, getVotes, deleteAllData }

@@ -1,6 +1,3 @@
-// require('dotenv').config()
-
-
 const request = require('request')
 
 
@@ -31,34 +28,41 @@ module.exports = (db, configOptions) => {
 
   // callback chaining - let's favour composition
   app.get('/oauth', (req, res, next) => {
-    if (req.query.code) next()
-    else {
-      res.status(500)
-      res.send({ 'Error': "Looks like we're not getting code." })
-    }
-  }, (req, res, next) => {
-    request({
-      url: 'https://slack.com/api/oauth.access',
-      qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
-      method: 'GET'
-    }, (error, response, body) => {
-      if (error) {
+      if (req.query.code) next()
+      else {
         res.status(500)
-        res.send({ 'Error': error })
-      } else {
-        res.redirect('/')
+        res.send({ 'Error': "Looks like we're not getting code." })
       }
-    })
+    },
+    // TODO: Insert middleware function to save req.query.code ?
+    (req, res, next) => {
+      // TODO: Promise candidate?
+      // TODO: Figure out what to do with the response
+      // TODO: Move hardcoded URLs into config
+      request({
+        url: 'https://slack.com/api/oauth.access',
+        qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
+        method: 'GET'
+      }, (error, response, body) => {
+        if (error) {
+          res.status(500)
+          res.send({ 'Error': error })
+        } else {
+          res.redirect('/')
+        }
+      })
 
-  })
+    })
 
 
   // /commands starts a new vote on the given channel
+  // On slack: /asyncvoter myFreshIssue http://we.really.care/myproblem
   app.post('/commands', (req, res, next) => {
 
     const text = req.body.text
     const channel_id = req.body.channel_id
 
+    // This is a promise
     db.setupVote(channel_id, text)
       .then(result => {
         res.send(formatMessage.start(text))
@@ -76,16 +80,18 @@ module.exports = (db, configOptions) => {
   app.post('/actions',
     (req, res, next) => {
       // setup for our processing
+      // Grab the info we need
       const payload = JSON.parse(req.body.payload)
       req.vote_label = payload.original_message.text
       req.user = payload.user.name
       req.channel_id = payload.channel.id
-      req.action = payload.actions[0].value
+      req.action = payload.actions[0].value // "Simple", "Medium", "Hard", "reveal"
       next()
     },
     (req, res, next) => {
       // Reveal votes
-
+      // TODO: Should anyone be able to reveal the vote?
+      // Currently anyone can
       if (req.action == 'reveal') {
         db.getVotes(req.channel_id)
           .then(votes => {
@@ -101,6 +107,8 @@ module.exports = (db, configOptions) => {
       // We have received a vote
       const voteLabel = req.vote_label
       const vote = req.action
+        // TODO: Should actually supply the vote label!
+        // What is the maximum number of votes per channel?
       db.giveVote(req.channel_id, req.user, vote)
         .then(result => {
           return db.getVotes(req.channel_id)
