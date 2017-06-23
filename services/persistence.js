@@ -4,7 +4,7 @@
 // Factory for persistence layer modules
 // Gives support for multiple persistence stores
 // Persistence layer modules are facades to the actual persistence objects & functions
-// A persistence object must contain: { setupVote, giveVote, getVotes, deleteAllData }
+// A persistence object must contain: { getName, setupVote, giveVote, getVotes, deleteAllData }
 
 const config = require('config')
 
@@ -16,7 +16,6 @@ module.exports = (store, options) => {
   console.log("Using persistence store: " + storeToUse)
   const moduleName = './persistence/' + storeToUse
 
-  console.log("+++ Loading:", moduleName)
   const persistence = require(moduleName)(options)
 
   // NO destruction of non-test databases

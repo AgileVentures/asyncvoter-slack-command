@@ -27,6 +27,15 @@ redisSynchronous.on('error', function (err) {
 
 
 module.exports = function (options) {
+
+  function getName() {
+    // TODO: This MUST be changed
+    // if the redis URL changes to include
+    // user/pass or otherwise, then this
+    // function must change to omit them!
+    return redisUrl
+  }
+
   // Return type - promise
   // Returns a string indicating success on promise fulfillment 
   const setupVote = (channel_id, label) => {
@@ -76,5 +85,5 @@ module.exports = function (options) {
     return redis.flushdbAsync()
   }
 
-  return { setupVote, giveVote, getVotes, deleteAllData }
+  return { setupVote, giveVote, getVotes, deleteAllData, getName }
 }
