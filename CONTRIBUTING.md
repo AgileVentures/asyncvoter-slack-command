@@ -21,7 +21,7 @@ To get involved please follow these steps:
 * review [open PRs](https://github.com/AgileVentures/async-voter-slack-command/pulls) on GitHub - leave comments or collaborate if interested
 
 
-#### 3. Look at what needs to be done on [our waffle project board:](https://waffle.io/AgileVentures/WebsiteOne)
+#### 3. Look at what needs to be done on [our waffle project board:](https://waffle.io/AgileVentures/async-voter-slack-command)
 
   1. look through **[ready](https://waffle.io/AgileVentures/async-voter-slack-command)** column - feel free to start work, but always interested to hear chat in slack, scrum wherever
 
@@ -40,7 +40,7 @@ Any *feature* should include appropriate Cucumber acceptance tests and RSpec uni
 
 A *bugfix* may include an acceptance test depending on where the bug occurred, but fixing a bug should start with the creation of a test that replicates the bug, so that any bugfix submission will include an appropriate test as well as the fix itself.
 
-Each developer will usually work with a [fork](https://help.github.com/articles/fork-a-repo/) of the [main repository on Agile Ventures](https://github.com/AgileVentures/WebSiteOne). Before starting work on a new feature or bugfix, please ensure you have [synced your fork to upstream/develop](https://help.github.com/articles/syncing-a-fork/):
+Each developer will usually work with a [fork](https://help.github.com/articles/fork-a-repo/) of the [main repository on Agile Ventures](https://github.com/AgileVentures/async-voter-slack-command). Before starting work on a new feature or bugfix, please ensure you have [synced your fork to upstream/develop](https://help.github.com/articles/syncing-a-fork/):
 
 ```
 git pull upstream develop
@@ -89,7 +89,7 @@ Currently https://github.com/mattlindsey is project managing AsyncVoter.  The pr
 
 The project managers will review the pull request for coherence with the specified feature or bug fix, and give feedback on code quality, user experience, documentation and git style.  Please respond to comments from the project managers with explanation, or further commits to your pull request in order to get merged in as quickly as possible.
 
-To maximize flexibility add the project manager as a collaborator to your WebSiteOne fork in order to allow them to help you fix your pull request, but this is not required.
+To maximize flexibility add the project manager as a collaborator to your AsyncVoter fork in order to allow them to help you fix your pull request, but this is not required.
 
 If your tests are passing locally, but failing on CI, please have a look at the fails and if you can't fix, please do reach out to the project manager.
 
