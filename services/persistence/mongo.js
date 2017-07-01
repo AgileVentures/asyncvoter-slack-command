@@ -10,13 +10,18 @@ const name = "mongo://" + config.host + ":" + config.port + '/' + config.databas
 
 const mongo = require('monk')(mongoUrl)
 
-// mongo.then(result => {
-//   console.log('Connected correctly to Mongo server:', result)
-//   return Promise.resolve(result)
-// })
-
+// These two collections represent a voting session activity
 const votingSessions = mongo.get('voting_sessions')
 const votes = mongo.get('votes')
+
+// votingSession - { channel, description }  // TODO: Include user ?!
+// votes - each vote is stored as { sessionDescription, user, action }
+
+// Where action could be described as the vote itself, an abstain or a reveal
+// A reveal currently ends the voting session
+// { channel, description, user, vote }
+
+
 
 module.exports = () => {
 
@@ -26,16 +31,16 @@ module.exports = () => {
 
   // TODO: Should we raise an error if a voting session has already happened?
   function setupVote(channelId, label) {
-    return votingSessions.insert({ channel_id: channelId, vote_label: label })
+    return votingSessions.insert({ channel_id: channelId, description: label })
   }
 
   function getCurrentVotingSession(channelId) {
     return votingSessions
-      .findOne({ channel_id: channelId }, { fields: { vote_label: 1 } }, { sort: { $natural: -1 } })
+      .findOne({ channel_id: channelId }, { fields: { description: 1 } }, { sort: { $natural: -1 } })
       .then(doc => {
         if (!doc) {
           return Promise.reject(new Error("Unable to find voting session, channelId: " + channelId));
-        } else return Promise.resolve(doc.vote_label)
+        } else return Promise.resolve(doc.description)
       })
   }
 
@@ -43,7 +48,7 @@ module.exports = () => {
   function giveVote(channelId, user, vote) {
     return getCurrentVotingSession(channelId)
       .then(voteLabel => {
-        return votes.insert({ channel_id: channelId, vote_label: voteLabel, user: user, vote: vote })
+        return votes.insert({ channel_id: channelId, description: voteLabel, user: user, vote: vote })
       })
   }
 
@@ -51,7 +56,7 @@ module.exports = () => {
   function getVotes(channelId) {
     return getCurrentVotingSession(channelId)
       .then(voteLabel => {
-        return votes.find({ channel_id: channelId, vote_label: voteLabel }, { fields: { user: 1, vote: 1 } }, { sort: { $natural: -1 } })
+        return votes.find({ channel_id: channelId, description: voteLabel }, { fields: { user: 1, vote: 1 } }, { sort: { $natural: -1 } })
       })
       .then(votes => {
         var voteObject = votes.reduce((acc, item) => {
@@ -69,7 +74,7 @@ module.exports = () => {
       .then(results => {
         return votes.remove({})
       })
-      .then(results => Promise.resolve(results))
+      //.then(results => Promise.resolve(results))
   }
 
   return { setupVote, giveVote, getVotes, deleteAllData, getName }

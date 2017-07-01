@@ -1,20 +1,20 @@
-// tests/unit/persistence.js
-'use strict'
+// // tests/unit/persistence.js
+// 'use strict'
 
-const redis = require(process.cwd() + '/services/persistence/redis')()
+// const redis = require(process.cwd() + '/services/persistence/redis')()
 
-const chai = require('chai')
-const should = chai.should()
+// const chai = require('chai')
+// const should = chai.should()
 
-// functions to check:
-// - getName
-// - setupVote
-// - giveVote
-// - getVotes
-// - deleteAllData
+// // functions to check:
+// // - getName
+// // - setupVote
+// // - giveVote
+// // - getVotes
+// // - deleteAllData
 
-describe('Persistence factory Unit tests', function () {
+// describe('Persistence factory Unit tests', function () {
 
 
 
-})
+// })
