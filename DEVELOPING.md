@@ -110,7 +110,8 @@ There are two other functions available during testing:
 
 In the mongo persistence store, the current implementation uses 2 stacks, one for voting session details, the other for votes. To stay asynchronous, we only insert and we don't update records/documents - so we eliminate race conditions.
 
-So, if there is some view of the data you'd like, we can extend the persistence layer as needed.
+So, if there is some view of the data required, we can extend the persistence layer as needed.
+
 
 
 ## Best Practices
@@ -133,9 +134,10 @@ With that in mind, these are the features that are practical for our project:
  - let and const
  - ... the spread operator
 
-_* We use the Bluebird Promise npm package. Node has built in promises, however they are not as efficient as Bluebird. As promises have been standardised, there are a number of drop-in replacements._
+_* We use the Bluebird Promise npm package. Node has built in promises, however they are not as efficient as Bluebird. As promises have been standardised, there are a number of drop-in replacements. As long as the Promise module conforms to the [Promises/A+](https://promisesaplus.com/ "Promises/A+") standard, it will work interchangeably with others._
 
 We should be favouring the use of Promises over call-backs. It's time to refactor to promises when you start to see "Christmas tree code" aka "callback hell".
+
 
 When you do use callbacks within express (httpd service), by convention express uses `(error, next)` as parameters.
 
@@ -149,6 +151,12 @@ Ideally, we test-first.
 Start with Unit tests - ensure your feature is included in the unit tests for the module you are working on.
 
 We use Mocha and chai for both unit and integration testing.
+
+**Note:** We are testing asynchronously, so we must always return a promise in our tests.
+
+Whenever a function body is enclosed in curly braces `{ ... }` you need to `return` a promise. See: [Mocha and promises documentation](https://mochajs.org/#working-with-promises "Mocha and promises documentation")
+
+
 
 ### Unit tests
 
