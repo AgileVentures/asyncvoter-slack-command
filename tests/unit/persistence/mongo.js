@@ -8,12 +8,20 @@ const chai = require('chai')
 const should = chai.should()
 
 const mongoUrl = config.host + ':' + config.port + '/' + config.database
+const ourMongoName = "mongo://" + mongoUrl
+  // WARNING: If you put password info in the mongoUrl, modify
+  // ourMongoName so that it omits it. ourMongoName will be displayed
+  // in the test.
+  // Please do not display passwords
 const mongo = require('monk')(mongoUrl)
 
 const votingSessions = mongo.get('voting_sessions')
 const votes = mongo.get('votes')
 
 const Promise = require('bluebird')
+
+const channelId = "The Channel ID"
+const description = "The vote description"
 
 // functions to check:
 // - getName
@@ -62,28 +70,31 @@ describe('Mongo facade Unit tests', function () {
           })
           .then((results) => {
             results.length.should.equal(2, "Results array test")
-            results.forEach(result => result.length.should.equal(0, "Single result test"))
+            results.forEach(result => result.length.should.equal(0,
+              "Single result test"))
           })
       })
 
     }) // deleteAllData() checks
 
 
-  describe.skip('getName() checks', function () {
+  describe('getName() checks', function () {
       const name = persistence.getName()
-      it('Check the name is mongo://<host>:<port>/<database>', function () {
-        const nameRegExp = /^mongo:\/\/\w[-\w]*:\d+\/[-\w]*test[-\w]*$/
-        nameRegExp.test(name).should.equal(true)
-      })
+      it('Check the name matches mongo://<host>:<port>/<database> ' +
+        'and "test" is in the database name',
+        function () {
+          const nameRegExp = /^mongo:\/\/\w[-\w]*:\d+\/[-\w]*test[-\w]*$/
+          nameRegExp.test(name).should.equal(true)
+        })
       const ourName = "mongo://" + mongoUrl
-      it('Check the name is ' + ourName, function () {})
+      it('Check the name is ' + ourName, function () {
+        persistence.getName().should.equal(ourName)
+      })
     }) // getName() checks
 
 
-  describe.skip('setupVote() checks', function () {
+  describe('setupVote() checks', function () {
       // Mongo stores voting sessions in the voting_sessions collection
-      const channelId = "The Channel ID"
-      const description = "The vote description"
 
       before(function () {
         return persistence.deleteAllData()
@@ -104,9 +115,32 @@ describe('Mongo facade Unit tests', function () {
       })
     }) // setupVote() checks
 
-  describe.skip('giveVote() checks', function () {})
+  // `persistence.giveVote(channelId, voteDescription, user, vote)`
+  describe('giveVote() checks', function () {
+    beforeEach(function () {
+      return persistence.deleteAllData()
+        .then(() => persistence.setupVote(channelId, description))
+    })
 
-  describe.skip('getVotes() checks', function () {})
+    it('casting a single vote', function () {
+      const user = { name: "Andrew Developer" }
+      const vote = "Medium"
+      return persistence.giveVote(channelId, description, user, vote)
+        .then(() => votes.find({ description: description }))
+        .then(votes => {
+          votes.length.should.equal(1)
+          votes[0].user.name.should.equal(user.name, "User error")
+          votes[0].vote.should.equal(vote, "Vote error")
+        })
+    })
+
+    it.skip('casting multiple votes')
+  })
+
+  describe.skip('getVotes() checks', function () {
+    describe.skip('Results are in expected format')
+    describe.skip('Voting in multiple votes on the same channel')
+  })
 
 
 })

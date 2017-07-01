@@ -30,8 +30,8 @@ module.exports = () => {
   }
 
   // TODO: Should we raise an error if a voting session has already happened?
-  function setupVote(channelId, label) {
-    return votingSessions.insert({ channel_id: channelId, description: label })
+  function setupVote(channelId, description) {
+    return votingSessions.insert({ channel_id: channelId, description: description })
   }
 
   function getCurrentVotingSession(channelId) {
@@ -45,18 +45,16 @@ module.exports = () => {
   }
 
 
-  function giveVote(channelId, user, vote) {
-    return getCurrentVotingSession(channelId)
-      .then(voteLabel => {
-        return votes.insert({ channel_id: channelId, description: voteLabel, user: user, vote: vote })
-      })
+  // `persistence.giveVote(channelId, voteDescription, user, vote)`
+  function giveVote(channelId, description, user, vote) {
+    return votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
   }
 
 
   function getVotes(channelId) {
     return getCurrentVotingSession(channelId)
-      .then(voteLabel => {
-        return votes.find({ channel_id: channelId, description: voteLabel }, { fields: { user: 1, vote: 1 } }, { sort: { $natural: -1 } })
+      .then(description => {
+        return votes.find({ channel_id: channelId, description: description }, { fields: { user: 1, vote: 1 } }, { sort: { $natural: -1 } })
       })
       .then(votes => {
         var voteObject = votes.reduce((acc, item) => {
