@@ -8,6 +8,10 @@
 - How it works
 	- Data persistence
 		- Functions for persistence and retrieval
+- Using git
+	- Clone AsyncVoter to your workspace directory:
+	- Check out a branch from the GitHub server
+	- Normal workflow \(on already fetch'ed branch\)
 - Best Practices
 	- Funcational JavaScript
 	- Testing
@@ -84,7 +88,7 @@ Developer A: reveal
 
 ### Data persistence
 
-To be clear, there is no schema _per se_ for AsyncVoting.
+To be clear, there is no database schema _per se_ for AsyncVoting.
 
 We need to be able to:
 - start a voting session
@@ -112,6 +116,28 @@ In the mongo persistence store, the current implementation uses 2 stacks, one fo
 
 So, if there is some view of the data required, we can extend the persistence layer as needed.
 
+## Using git
+
+### Clone AsyncVoter to your workspace directory:
+- `git clone git@github.com:AgileVentures/asyncvoter-slack-command.git`
+- `cd asyncvoter-slack-command`
+
+### Check out a branch from the GitHub server
+- `git fetch origin zsuark_experimental_test_review`
+- `git checkout zsuark_experimental_test_review`
+- *... make and test changes ...*
+- `git add <file(s) to commit>`
+- `git commit -m "Updated x. Added y. Short but expressive description here"`
+- For the first push: `git push -u origin/zsuark_experimental_test_review`
+
+### Normal workflow (on already fetch'ed branch)
+- `git pull` to ensure we have any changes others have made
+- *... make and test changes ...*
+- `git add <file(s) to commit>`
+- `git commit -m "Updated x. Added y. Short but expressive description here"`
+- `git push`
+
+**Note:** Use `git status` to see the current state of git, file changes, what will be included in the commit, etc.
 
 
 ## Best Practices
@@ -121,7 +147,9 @@ So, if there is some view of the data required, we can extend the persistence la
 
 ### Funcational JavaScript
 
-ECMAScript 2015 (a.k.a. ES6) brought a number of new functional features to the standard. Node implemented many in v6 and v7, with tail-call optimatisation still . Functional software languages have a lot to offer our project goals.
+ECMAScript 2015 (a.k.a. ES6) brought a number of new functional features to the standard. Node implemented many in v6 and v7, with tail-call optimatisation still to be implemented in the stable version.
+
+Functional software languages have a lot to offer our project goals. They are especially good for asynchronous and distributed processing.
 
 With that in mind, these are the features that are practical for our project:
 
@@ -136,7 +164,7 @@ With that in mind, these are the features that are practical for our project:
 
 _* We use the Bluebird Promise npm package. Node has built in promises, however they are not as efficient as Bluebird. As promises have been standardised, there are a number of drop-in replacements. As long as the Promise module conforms to the [Promises/A+](https://promisesaplus.com/ "Promises/A+") standard, it will work interchangeably with others._
 
-We should be favouring the use of Promises over call-backs. It's time to refactor to promises when you start to see "Christmas tree code" aka "callback hell".
+We should be favouring the use of Promises over call-backs. It's time to refactor to promises when you start to see "Christmas tree code" a.k.a. "callback hell".
 
 
 When you do use callbacks within express (httpd service), by convention express uses `(error, next)` as parameters.
@@ -146,7 +174,7 @@ When you do use callbacks within express (httpd service), by convention express 
 
 Test-first, test after - just test!
 
-Ideally, we test-first.
+Ideally, we test-first and consistently use TDD. With the introduction of the new software structure, how to test should be clear.
 
 Start with Unit tests - ensure your feature is included in the unit tests for the module you are working on.
 
@@ -154,8 +182,12 @@ We use Mocha and chai for both unit and integration testing.
 
 **Note:** We are testing asynchronously, so we must always return a promise in our tests.
 
-Whenever a function body is enclosed in curly braces `{ ... }` you need to `return` a promise. See: [Mocha and promises documentation](https://mochajs.org/#working-with-promises "Mocha and promises documentation")
+Whenever a function body is enclosed in curly braces `{ ... }` you need to `return` a promise. 
 
+See: 
+- [Mocha and promises documentation](https://mochajs.org/#working-with-promises "Mocha and promises documentation")
+- [Mocha](https://mochajs.org/ "Mocha")
+- [Chai](http://chaijs.com/ "Chai")
 
 
 ### Unit tests
@@ -190,5 +222,6 @@ Note: Although we have anticipated it, in practise we haven't yet found the need
 
 ### Egg timer
 
-Set a maximum time limit before votes are revealed.
+Set a maximum time limit before votes are revealed and/or a reminder is given
+
 
