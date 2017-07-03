@@ -93,7 +93,7 @@ We need to be able to:
 
 N.B. channel id and vote description are used as identifiers. User information is also supplied.
 
-Provided any persistence store can fulfil these behaviours - we don't care how it's implemented.
+**Provided any persistence store can fulfil these behaviours - we don't care how it's implemented.**
 
 #### Functions for persistence and retrieval
 
