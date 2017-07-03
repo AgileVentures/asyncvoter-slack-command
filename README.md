@@ -9,17 +9,12 @@ You can vote on any thing: you just provide some text to display. (You can inclu
 
 This is an experimental branch by Raphael Krausz - but feel free to join me.
 
-### Implementing DI for persistence
+## Currently implementing unit tests - mongo
 
-Currently I am implementing putting a dependency injection pattern onto the persistence layer.
+ - next to ensure all other unit tests are present
+ - Then integration tests
+ - as soon as the first unit tests in, we can put this to staging, and start this branch as the new development branch 
 
-### Outcomes:
-
-- Mongo and Redis can be used interchangeably.
-- Interoperability with other databases / persistence stores can be added in with minimal effort.
-- Write an interface to the store and inject it in as the persistence layer.
-
-#
 
 ## Usage
 
@@ -39,6 +34,7 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 ## Requirements
 
+- [Mongo](https://www.mongodb.com/) v3.4 or later (may work with lower versions)
 - [Redis](https://redis.io/) v3.2.8 or later
 - [Node](https://nodejs.org) v7.6.0 or later
 
@@ -51,6 +47,16 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 3. Run the server `npm run dev`
 
 You **need** to set up your own Slack **team** and Slack **app** to continue!
+
+Try to understand the new features ES2015 brings, especially the new functional programming enhancements, such as:
+
+- reduce
+- filter
+- promises
+
+See the link in the references for a great walkthrough of this topic.
+
+A [development guide](./DEVELOPING.md "Development Guide") is included as [DEVELOPING.md](./DEVELOPING.md "Development Guide") in this repo. This document should give you a roadmap to the software architecture and development.
 
 ## Setting Up your own Slack team and app
 
@@ -67,3 +73,4 @@ You **need** to set up your own Slack **team** and Slack **app** to continue!
 - [Getting started with Slack apps](https://api.slack.com/slack-apps)
 - [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
 - [One of Sam's blogs on the background of AsyncVoter](https://medium.com/agileventures/automating-what-to-do-next-7295c62007d9)
+- [Functional Programming in JavaScript](https://www.youtube.com/playlist?list=PL0zVEGEvSaeEd9hlmCXrk5yUyqUag-n84)
