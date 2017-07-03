@@ -1,0 +1,9 @@
+{
+  // Persistence layer defaults
+  "persistence": {
+    "default": "mongo",
+    "mongo": {
+      "database": "asyncvoter-test"
+    }
+  }
+}
