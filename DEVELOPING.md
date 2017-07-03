@@ -12,6 +12,7 @@
 	- Clone AsyncVoter to your workspace directory:
 	- Check out a branch from the GitHub server
 	- Normal workflow \(on already fetch'ed branch\)
+	- Helpful commands
 - Best Practices
 	- Funcational JavaScript
 	- Testing
@@ -97,7 +98,7 @@ We need to be able to:
 
 N.B. channel id and vote description are used as identifiers. User information is also supplied.
 
-**Provided any persistence store can fulfil these behaviours - we don't care how it's implemented.**
+_**Provided any persistence store can fulfil these behaviours - we don't care how it's implemented.**_
 
 #### Functions for persistence and retrieval
 
@@ -137,7 +138,9 @@ So, if there is some view of the data required, we can extend the persistence la
 - `git commit -m "Updated x. Added y. Short but expressive description here"`
 - `git push`
 
-**Note:** Use `git status` to see the current state of git, file changes, what will be included in the commit, etc.
+### Helpful commands
+- Use `git status` to see the current state of git, file changes, what will be included in the commit, etc.
+- Use `git commit -am "<commit message>"` to commit all changes.
 
 
 ## Best Practices
@@ -172,7 +175,7 @@ When you do use callbacks within express (httpd service), by convention express 
 
 ### Testing
 
-Test-first, test after - just test!
+Test first, test after - just test!
 
 Ideally, we test-first and consistently use TDD. With the introduction of the new software structure, how to test should be clear.
 
