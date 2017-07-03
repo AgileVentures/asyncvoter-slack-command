@@ -123,23 +123,147 @@ describe('Mongo facade Unit tests', function () {
     })
 
     it('casting a single vote', function () {
-      const user = { name: "Andrew Developer" }
+      // const user = { name: "Andrew Developer" }
+      const user = "Andrew Developer"
       const vote = "Medium"
       return persistence.giveVote(channelId, description, user, vote)
         .then(() => votes.find({ description: description }))
         .then(votes => {
           votes.length.should.equal(1)
-          votes[0].user.name.should.equal(user.name, "User error")
+          votes[0].user.should.equal(user, "User error")
           votes[0].vote.should.equal(vote, "Vote error")
         })
     })
 
-    it.skip('casting multiple votes')
+    it('casting multiple votes', function () {
+      const user1 = "Developer A"
+      const user2 = "Developer B"
+      const user3 = "Developer C"
+      const user4 = "Developer D"
+      const [simple, medium, hard] = ["Simple", "Medium", "Hard"]
+
+      return Promise.all([
+        persistence.giveVote(channelId, description, user1, simple),
+        persistence.giveVote(channelId, description, user2, hard),
+        persistence.giveVote(channelId, description, user3, medium),
+        persistence.giveVote(channelId, description, user4, medium)
+      ]).then(results => {
+        results.length.should.equal(4)
+        return Promise.all([
+          persistence.giveVote(channelId, description, user1, medium),
+          persistence.giveVote(channelId, description, user2, medium)
+        ])
+      }).then(results => {
+        results.length.should.equal(2)
+        return votes.find({ channel_id: channelId, description: description }, { sort: { $natural: 1 } })
+      }).then(votes => {
+        // console.log("votes:", JSON.stringify(votes))
+        // console.log("votes.length:", JSON.stringify(votes.length))
+        votes.length.should.equal(6)
+
+
+
+        const voteUsers = votes.reduce((acc, val) => {
+          // console.log('val:', JSON.stringify(val))
+
+          const userName = val.user
+          if (acc.hasOwnProperty(userName)) {
+            acc[userName] = [...acc[userName], val.vote]
+          } else {
+            acc[userName] = [val.vote]
+          }
+
+          return acc
+        }, {})
+
+        voteUsers[user1].length.should.equal(2)
+        voteUsers[user1][0].should.equal(simple)
+        voteUsers[user1][1].should.equal(medium)
+        voteUsers[user2].length.should.equal(2)
+        voteUsers[user2][0].should.equal(hard)
+        voteUsers[user2][1].should.equal(medium)
+        voteUsers[user3].length.should.equal(1)
+        voteUsers[user3][0].should.equal(medium)
+        voteUsers[user4].length.should.equal(1)
+        voteUsers[user4][0].should.equal(medium)
+
+      })
+
+    })
   })
 
-  describe.skip('getVotes() checks', function () {
-    describe.skip('Results are in expected format')
-    describe.skip('Voting in multiple votes on the same channel')
+  describe('getVotes() checks', function () {
+
+    const user1 = "Developer A"
+    const user2 = "Developer B"
+    const user3 = "Developer C"
+    const user4 = "Developer D"
+    const [simple, medium, hard] = ["Simple", "Medium", "Hard"]
+    const description = "first vote description"
+    const description2 = "other vote description"
+
+
+    beforeEach(function () {
+
+      return persistence.deleteAllData()
+        // .then(() => persistence.setupVote(channelId, description))
+        .then(function () {
+          // console.log("description:", description)
+          return persistence.setupVote(channelId, description)
+        }).then(function (result) {
+          // console.log("------ result:", result)
+          // console.log("description:", description)
+          // console.log("description2:", description2)
+          // return persistence.setupVote(channelId, description2)
+          return persistence.giveVote(channelId, description, user1, simple)
+            // return persistence.giveVote(channelId, "description", user1, simple)
+            // return persistence.giveVote(channelId, result.description, user1.name, simple)
+        })
+        // .then(function () {
+        //   return persistence.giveVote(channelId, description, user1, simple)
+        // })
+        // .then(() => persistence.giveVote(channelId, description, user1, simple))
+        // .then(() => Promise.all([
+        //   persistence.giveVote(channelId, description, user1, simple),
+        //   persistence.giveVote(channelId, description, user2, hard),
+        //   persistence.giveVote(channelId, description, user3, medium),
+        //   persistence.giveVote(channelId, description, user4, medium),
+        // ]))
+        // .then(() => persistence.setupVote(channelId, description2))
+        // .then(() => Promise.all([
+        //   persistence.giveVote(channelId, description2, user1, hard),
+        //   persistence.giveVote(channelId, description2, user2, hard),
+        //   persistence.giveVote(channelId, description2, user3, hard),
+        // ]))
+        // .then(() => Promise.all([
+        //   persistence.giveVote(channelId, description, user1, medium),
+        //   persistence.giveVote(channelId, description, user2, medium)
+        // ]))
+    })
+
+
+    it('Results are in expected format', function () {
+      console.log()
+      console.log("channelId:", channelId)
+      console.log("description:", description)
+        // return votes.find({ channel_id: channelId, description: description })
+      return votes.find({ channel_id: channelId })
+        .then(results => {
+          // console.log("~±~±~±~±~±~±~±~± Found votes: " + results)
+          console.log("~±~±~±~±~±~±~±~± Found votes: " + JSON.stringify(results))
+            //votes.length.should.not.equal(0)
+        })
+        // return persistence.getVotes(channelId, description)
+        //   .then(result => {
+        //     console.log("result:", JSON.stringify(result))
+        //result.length.should.equal(1)
+    })
+
+
+    describe.skip('Voting in multiple votes on the same channel', function () {
+
+    })
+
   })
 
 

@@ -34,33 +34,33 @@ module.exports = () => {
     return votingSessions.insert({ channel_id: channelId, description: description })
   }
 
-  function getCurrentVotingSession(channelId) {
-    return votingSessions
-      .findOne({ channel_id: channelId }, { fields: { description: 1 } }, { sort: { $natural: -1 } })
-      .then(doc => {
-        if (!doc) {
-          return Promise.reject(new Error("Unable to find voting session, channelId: " + channelId));
-        } else return Promise.resolve(doc.description)
-      })
-  }
-
-
   // `persistence.giveVote(channelId, voteDescription, user, vote)`
   function giveVote(channelId, description, user, vote) {
-    return votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
+    // console.log("giveVote - channelId, description, user, vote:", channelId, description, user, vote)
+    // return votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
+    const promise = votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
+      // console.log("promise:", promise)
+    return promise
   }
 
 
-  function getVotes(channelId) {
-    return getCurrentVotingSession(channelId)
-      .then(description => {
-        return votes.find({ channel_id: channelId, description: description }, { fields: { user: 1, vote: 1 } }, { sort: { $natural: -1 } })
-      })
+  function getVotes(channelId, description) {
+    // console.log("In getVotes")
+    // console.log("channelId, description:", channelId, description)
+    return votes.find({ channel_id: channelId, description: description }, { sort: { $natural: -1 } })
       .then(votes => {
-        var voteObject = votes.reduce((acc, item) => {
-          acc[item.user] = item.vote
-          return acc
-        }, {})
+        // console.log('********* HERE')
+        // console.log('_@_@_@_@_@_ votes:', votes)
+        let voteObject = votes.reduce((acc, item) => {
+            // console.log("!!!!!!!   acc, item:", acc, item)
+            if (!acc["channel_id"]) {
+              acc["channel_id"] = channelId
+              acc["description"] = item.description
+            }
+            acc[item.user] = item.vote
+            return acc
+          }, {})
+          // console.log("----- HERE")
         return Promise.resolve(voteObject)
       })
   }
