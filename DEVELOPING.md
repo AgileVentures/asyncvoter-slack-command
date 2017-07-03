@@ -22,6 +22,7 @@
 	- Result of voting
 	- Re-voting / Multiple rounds of voting
 	- Egg timer
+- Directory Structure
 
 <!-- /MarkdownTOC -->
 
@@ -227,4 +228,39 @@ Note: Although we have anticipated it, in practise we haven't yet found the need
 
 Set a maximum time limit before votes are revealed and/or a reminder is given
 
+## Directory Structure
 
+```
+asyncvoter-slack-command
+├── CONTRIBUTING.md
+├── DEVELOPING.md
+├── ISSUES.md
+├── README.md
+├── license.txt
+├── package.json
+├── server.js
+├── services
+│   ├── persistence
+│   │   ├── mongo.js
+│   │   └── redis.js
+│   ├── persistence.js
+│   ├── slack-http
+│   │   ├── outboundMessaging.js
+│   │   └── views
+│   │       └── index.ejs
+│   └── slack-http.js
+└── tests
+    ├── helpers
+    │   └── integrationHelper.js
+    ├── integration
+    │   ├── installApp.js
+    │   ├── landingPage.js
+    │   ├── multiVoting.js
+    │   └── old_integration_tests.js
+    ├── test-defaults.js
+    └── unit
+        ├── persistence
+        │   ├── mongo.js
+        │   └── redis.js
+        └── persistence.js
+```
