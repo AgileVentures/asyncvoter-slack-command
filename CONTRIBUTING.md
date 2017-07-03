@@ -79,13 +79,16 @@ fixes #799
 
 which will associate the pull request with the issue in the Waffle board.
 
-Note that before submitting a PR, your branch should be tested on the AsyncVoter staging environment.
-Please have an existing member walk you through this process.  TODO: Document how to push a branch to dokku staging here.
+**Note that before submitting a PR**, your branch should be tested on the AsyncVoter staging environment.
+
+**Please have an existing member walk you through this process.**
+
+TODO: Document how to push a branch to dokku staging here.
 
 Pull Request Review
 -------------------
 
-Currently https://github.com/mattlindsey is project managing AsyncVoter.  The project manager will review your pull request as soon as possible.  Usually the project manager will need to sign off in order to merge a pull request.
+Currently [Matt (@mlindsey)](https://github.com/mattlindsey "Matt (@mlindsey)") and [Raphael (@Zsuark)](https://github.com/zsuark "Raphael (@Zsuark)") are project managing AsyncVoter.  The project manager will review your pull request as soon as possible.  Usually the project manager will need to sign off in order to merge a pull request.
 
 The project managers will review the pull request for coherence with the specified feature or bug fix, and give feedback on code quality, user experience, documentation and git style.  Please respond to comments from the project managers with explanation, or further commits to your pull request in order to get merged in as quickly as possible.
 
