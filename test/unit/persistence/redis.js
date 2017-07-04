@@ -1,4 +1,4 @@
-// // tests/unit/persistence/redis.js
+// // test/unit/persistence/redis.js
 // 'use strict'
 // 
 // const config = require('config').get("persistence.redis")

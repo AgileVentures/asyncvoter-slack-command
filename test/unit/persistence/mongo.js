@@ -1,4 +1,4 @@
-// tests/unit/persistence/mongo.js
+// test/unit/persistence/mongo.js
 'use strict'
 
 const config = require('config').get("persistence.mongo")

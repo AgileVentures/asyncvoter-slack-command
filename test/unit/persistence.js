@@ -1,4 +1,4 @@
-// // tests/unit/persistence.js
+// // test/unit/persistence.js
 // 'use strict'
 
 // const redis = require(process.cwd() + '/services/persistence/redis')()
