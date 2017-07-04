@@ -272,16 +272,9 @@ describe('Mongo facade Unit tests', function () {
               .should.equal(true, `Username "${username}" is missing from results!`))
 
             // Check every vote is hard, as per expected
-            voteKeys.forEach(user => {
-              let receivedVote = results.votes[user]
-              console.log("user: " + user)
-              console.log("receivedVote: " + receivedVote)
-
-              results.votes[user].should.equal(hard,
-                `Vote "${description2}", ${user} has voted "${hard}"` +
-                ` not "${results.votes[user]}" as reported`
-              )
-            })
+            voteKeys.forEach(user => results.votes[user].should.equal(hard,
+              `Vote "${description2}", ${user} has voted "${hard}"` +
+              ` not "${results.votes[user]}" as reported`))
 
             return persistence.getVotes(channelId, description)
           })
