@@ -36,31 +36,17 @@ module.exports = () => {
 
   // `persistence.giveVote(channelId, voteDescription, user, vote)`
   function giveVote(channelId, description, user, vote) {
-    // console.log("giveVote - channelId, description, user, vote:", channelId, description, user, vote)
-    // return votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
-    const promise = votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
-      // console.log("promise:", promise)
-    return promise
+    return votes.insert({ channel_id: channelId, description: description, user: user, vote: vote })
   }
 
 
   function getVotes(channelId, description) {
-    // console.log("In getVotes")
-    // console.log("channelId, description:", channelId, description)
-    return votes.find({ channel_id: channelId, description: description }, { sort: { $natural: -1 } })
+    return votes.find({ channel_id: channelId, description: description }, { sort: { $natural: 1 } })
       .then(votes => {
-        // console.log('********* HERE')
-        // console.log('_@_@_@_@_@_ votes:', votes)
         let voteObject = votes.reduce((acc, item) => {
-            // console.log("!!!!!!!   acc, item:", acc, item)
-            if (!acc["channel_id"]) {
-              acc["channel_id"] = channelId
-              acc["description"] = item.description
-            }
-            acc[item.user] = item.vote
-            return acc
-          }, {})
-          // console.log("----- HERE")
+          acc["votes"][item.user.name] = item.vote
+          return acc
+        }, { channel_id: channelId, description: description, votes: {} })
         return Promise.resolve(voteObject)
       })
   }
@@ -72,7 +58,6 @@ module.exports = () => {
       .then(results => {
         return votes.remove({})
       })
-      //.then(results => Promise.resolve(results))
   }
 
   return { setupVote, giveVote, getVotes, deleteAllData, getName }
