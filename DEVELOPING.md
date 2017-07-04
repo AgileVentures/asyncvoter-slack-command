@@ -23,6 +23,9 @@
 	- Re-voting / Multiple rounds of voting
 	- Egg timer
 - Directory Structure
+- The root directory
+- The services directory
+- The test directory
 
 <!-- /MarkdownTOC -->
 
@@ -196,16 +199,16 @@ See:
 
 ### Unit tests
 
-Unit tests are found in `tests/unit/`
+Unit tests are found in `test/unit/`
 
 So if we have a module called 'FabulousModule', we would find the unit tests in: 
-`tests/unit/FabulousModule.js`
+`test/unit/FabulousModule.js`
 
 ### Integration tests
 
-We find the integration tests in `tests/integration/` with each test isolated in it's own file.
+We find the integration tests in `test/integration/` with each test isolated in it's own file.
 
-For example, we would find tests for "My Fabulous Feature" in `tests/integration/MyFabulousFeature.js`
+For example, we would find tests for "My Fabulous Feature" in `test/integration/MyFabulousFeature.js`
 
 
 ## Potential features
@@ -236,7 +239,7 @@ asyncvoter-slack-command
 ├── DEVELOPING.md
 ├── ISSUES.md
 ├── README.md
-├── license.txt
+├── LICENSE.txt
 ├── package.json
 ├── server.js
 ├── services
@@ -249,7 +252,7 @@ asyncvoter-slack-command
 │   │   └── views
 │   │       └── index.ejs
 │   └── slack-http.js
-└── tests
+└── test
     ├── helpers
     │   └── integrationHelper.js
     ├── integration
@@ -264,3 +267,14 @@ asyncvoter-slack-command
         │   └── redis.js
         └── persistence.js
 ```
+## The root directory
+
+- `server.js` - the module to run to start it all
+- `CONTRIBUTING.md`, `DEVELOPING.md`, `ISSUES.md` and `README.md` - documentation files (markdown)
+- `LICENSE.txt` - contains the license details (MIT license)
+
+## The services directory
+
+## The test directory
+
+Please place your unit tests in the `unit` directory. Mirror the directory structure as per the services directory.
