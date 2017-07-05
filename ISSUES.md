@@ -29,4 +29,5 @@ This document is a running sheet of currently issues and other observations. Bef
 
 ### services/slack-http/outboundMessaging.js
 
-What are the actual correct formats of the messages? I'm guessing in my tests.
+- What are the actual correct formats of the messages? I'm guessing in my tests.
+- https://api.slack.com/docs/messages
