@@ -18,3 +18,15 @@ This document is a running sheet of currently issues and other observations. Bef
 
 - Documentation is brought up-to-date with experimental branch before pushing/merging
 
+## Security
+
+### Should anyone be able to reveal the vote?
+- Currently anyone can
+
+### We should be checking that incoming connections actually come from Slack
+
+## Testing
+
+### services/slack-http/outboundMessaging.js
+
+What are the actual correct formats of the messages? I'm guessing in my tests.
