@@ -5,6 +5,17 @@
 This document is a running sheet of currently issues and other observations. Before merging the current development brach, any outstanding issues here may be discussed and pushed to the issues on GitHub where needed.
 
 
+## Misc
+
+ECMAScript v6 - http://www.ecma-international.org/ecma-262/6.0/
+ECMAScript v7 - http://www.ecma-international.org/ecma-262/7.0/
+ECMAScript current version - http://www.ecma-international.org/ecma-262/
+
+Mocha/Chai "Cheat sheet" - http://samwize.com/2014/02/08/a-guide-to-mochas-describe-it-and-setup-hooks/
+
+Singleton classes in ES6 - http://amanvirk.me/singleton-classes-in-es6/
+
+
 ## Asynchronous Timing issues
 
 - What if someone clicks reveal at the same time as some votes, the reveal arrives at the server first....
