@@ -5,7 +5,7 @@ function start(text) {
     'text': `<!here> ASYNC VOTE on "${text}"`,
     'attachments': [{
       'text': 'Please choose a difficulty',
-      'fallback': 'Woops! Something bad happens!',
+      // 'fallback': 'Woops! Something bad happens!',
       'callback_id': 'voting_session',
       'color': '#3AA3E3',
       'attachment_type': 'default',
