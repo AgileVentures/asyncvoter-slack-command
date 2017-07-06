@@ -37,6 +37,14 @@ Because of the somewhat asynchronous nature of testing, you sometimes see this:
 
 We need to refactor where and how deleteAllData is being used to avoid this from being a possibility
 
+--RESOLVED-- Feel free to double check
+
+## Asking for test and non-test persistent store connections
+
+Singleton classes in ES6 - http://amanvirk.me/singleton-classes-in-es6/
+BUT - https://stackoverflow.com/questions/13179109/singleton-pattern-in-nodejs-is-it-needed
+AND - http://fredkschott.com/post/2013/12/node-js-cookbook---designing-singletons/
+
 ## Misc
 
 ECMAScript v6 - http://www.ecma-international.org/ecma-262/6.0/
@@ -44,8 +52,6 @@ ECMAScript v7 - http://www.ecma-international.org/ecma-262/7.0/
 ECMAScript current version - http://www.ecma-international.org/ecma-262/
 
 Mocha/Chai "Cheat sheet" - http://samwize.com/2014/02/08/a-guide-to-mochas-describe-it-and-setup-hooks/
-
-Singleton classes in ES6 - http://amanvirk.me/singleton-classes-in-es6/
 
 ## Mocha issues
 

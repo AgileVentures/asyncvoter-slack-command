@@ -2,6 +2,7 @@ const servicesDir = process.cwd() + "/services/"
 const persistence = require(servicesDir + "persistence")()
 const app = require(servicesDir + "slack-http")(persistence)
 
+
 const Promise = require("bluebird")
 
 const chai = require('chai')
@@ -12,6 +13,8 @@ const nock = require('nock')
 chai.use(require('chai-http'))
 chai.use(require('chai-string'))
 
+const request = chai.request(app)
+
 const code = 1;
 
 
@@ -20,8 +23,7 @@ const handleError = err => Promise.reject(err)
 
 function makeVote(channelId, voteLabel, username, actionValue) {
 
-  return chai.request(app)
-    .post('/actions')
+  return request.post('/actions')
     .send({
       payload: JSON.stringify({
         channel: { id: channelId },
@@ -44,8 +46,7 @@ describe("Old tests to be reviewed/refactored", function () {
 
 
     it('Start a voting session', function () {
-      chai.request(app)
-        .post('/commands')
+      return request.post('/commands')
         .send({ text: 'Feature 1', channel_id: 1 })
         .then(res => {
 
@@ -67,8 +68,7 @@ describe("Old tests to be reviewed/refactored", function () {
     })
 
     it('Record a vote', function () {
-      return chai.request(app)
-        .post('/actions')
+      return request.post('/actions')
         .send({
           payload: JSON.stringify({
             channel: { id: 1 },
@@ -95,8 +95,7 @@ describe("Old tests to be reviewed/refactored", function () {
     })
 
     it('Reveal the results', function () {
-      chai.request(app)
-        .post('/actions')
+      return request.post('/actions')
         .send({
           payload: JSON.stringify({
             channel: { id: 1 },
@@ -121,8 +120,7 @@ describe("Old tests to be reviewed/refactored", function () {
     const castVote = makeVote.bind(makeVote, channelId, voteLabel)
 
     before(function () {
-      return chai.request(app)
-        .post('/commands')
+      return request.post('/commands')
         .send({ text: voteLabel, channel_id: channelId })
     })
 
@@ -154,8 +152,7 @@ describe("Old tests to be reviewed/refactored", function () {
 
     it('Confirm the results', function () {
 
-      return chai.request(app)
-        .post('/actions')
+      return request.post('/actions')
         .send({
           payload: JSON.stringify({
             channel: { id: channelId },
@@ -185,15 +182,6 @@ describe("Old tests to be reviewed/refactored", function () {
     const voteLabel = "Test Vote"
     const castVote = makeVote.bind(makeVote, channelId, voteLabel)
 
-    beforeEach(function () {
-      persistence.deleteAllData()
-        .then(result => {
-          return persistence.setupVote(channelId, voteLabel)
-        })
-
-    })
-
-
     it('Record a vote to a restarted session', function () {
 
       return castVote("User 1", "Simple")
@@ -210,8 +198,7 @@ describe("Old tests to be reviewed/refactored", function () {
 
           responseText.should.have.string('User 1')
           responseText.should.have.string('User 2')
-          return chai.request(app)
-            .post('/actions')
+          return request.post('/actions')
             .send({
               payload: JSON.stringify({
                 channel: { id: channelId },
@@ -231,4 +218,52 @@ describe("Old tests to be reviewed/refactored", function () {
     })
 
   })
+})
+
+// ////////////////////////////////////////////////////////////// //
+
+
+const config = require('config').get("slack-http")
+const client_id = config.client_id
+const client_secret = config.client_secret
+
+
+describe('Install app', function () {
+  it('Authorize the app', function () {
+
+    // External requests are mocked
+    nock('https://slack.com')
+      .get('/api/oauth.access')
+      .query({ code, client_id, client_secret })
+      .reply(200)
+
+    return request.get('/oauth')
+      .query({ code, client_id, client_secret })
+      .send()
+      .then(res => {
+        res.should.redirect
+        app.server.close()
+      })
+      .catch(handleError)
+  })
+})
+
+describe('Landing page', function () {
+  it('Display Slack button', function () {
+
+    return request.get('/')
+      .send()
+      .then(res => {
+        res.should.have.status(200)
+        res.should.be.html
+        res.text.should.have.string(client_id)
+        app.server.close()
+        return Promise.resolve(res)
+      })
+      .catch(err => {
+        return handleError(err)
+      })
+
+  })
+
 })
