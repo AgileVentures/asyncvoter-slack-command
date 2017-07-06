@@ -5,6 +5,16 @@
 This document is a running sheet of currently issues and other observations. Before merging the current development brach, any outstanding issues here may be discussed and pushed to the issues on GitHub where needed.
 
 
+## services/persistence/mongo.js
+
+This needs be added to the start of the deleteAllData function
+
+    ```if (process.env.NODE_ENV !== 'test')
+      throw Error('You cannot delete data except under test conditions')```
+
+deleteAllData is **extremely** dangerous, and we really need to ensure it is **never**
+called on production data
+
 ## Misc
 
 ECMAScript v6 - http://www.ecma-international.org/ecma-262/6.0/
