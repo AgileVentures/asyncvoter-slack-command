@@ -11,8 +11,8 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
 const config = require('config').get('slack-http')
-const clientId = config.client_id
-const clientSecret = config.client_secret
+const clientId = process.env.CLIENT_ID || config.client_id
+const clientSecret = process.env.CLIENT_SECRET || config.client_secret
 
 const defaultPort = config.port
 
