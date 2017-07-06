@@ -18,7 +18,7 @@ const defaultPort = config.port
 
 const formatMessage = require('./slack-http/outboundMessaging')
 
-module.exports = (db, configOptions) => {
+module.exports = (persistence, configOptions) => {
 
   const port = (configOptions) ? configOptions.port || defaultPort : defaultPort
 
@@ -63,7 +63,7 @@ module.exports = (db, configOptions) => {
     const channel_id = req.body.channel_id
 
     // This is a promise
-    db.setupVote(channel_id, text)
+    persistence.setupVote(channel_id, text)
       .then(result => {
         res.send(formatMessage.start(text))
       })
@@ -83,19 +83,20 @@ module.exports = (db, configOptions) => {
       // Grab the info we need
       const payload = JSON.parse(req.body.payload)
       req.vote_label = payload.original_message.text
-      req.user = payload.user.name
+      req.user = payload.user
       req.channel_id = payload.channel.id
-      req.action = payload.actions[0].value // "Simple", "Medium", "Hard", "reveal"
+      req.action = payload.actions[0].value // "Simple", "Medium", "Hard", "Reveal"
       next()
     },
     (req, res, next) => {
       // Reveal votes
       // TODO: Should anyone be able to reveal the vote?
       // Currently anyone can
-      if (req.action == 'reveal') {
-        db.getVotes(req.channel_id)
+      if (req.action == 'Reveal') {
+
+        persistence.getVotes(req.channel_id, req.vote_label)
           .then(votes => {
-            res.send(formatMessage.reveal(req.vote_label, votes))
+            res.send(formatMessage.reveal(req.vote_label, votes.votes))
           })
           .catch(err => {
             next(err)
@@ -107,14 +108,14 @@ module.exports = (db, configOptions) => {
       // We have received a vote
       const voteLabel = req.vote_label
       const vote = req.action
-        // TODO: Should actually supply the vote label!
-        // What is the maximum number of votes per channel?
-      db.giveVote(req.channel_id, req.user, vote)
+
+      // TODO: What is the maximum number of votes per channel?
+      persistence.giveVote(req.channel_id, voteLabel, req.user, vote)
         .then(result => {
-          return db.getVotes(req.channel_id)
+          return persistence.getVotes(req.channel_id, voteLabel)
         })
         .then(votes => {
-          res.send(formatMessage.receiveVote(voteLabel, votes))
+          res.send(formatMessage.receiveVote(voteLabel, votes.votes))
         })
         .catch(err => {
           next(err)

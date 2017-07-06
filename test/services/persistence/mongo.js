@@ -70,6 +70,23 @@ describe('Mongo facade Unit tests', function () {
           })
       })
 
+      it("deleteAllData should not work in production mode", function () {
+        // DANGER! DANGER! DANGER! SHOULD NEVER BE RUN ON LIVE SYSTEM
+        // NEED TO UNIT TEST THIS RATHER THAN INTEGRATION TEST
+
+        // NEEDS TO BE MOCKED!!!!!!!!!!!!!!!!!!!!!!!
+        // TODO!!!!!!!!!!!
+
+        // // WARNING!!! Asynchronous errors with doing this?
+        // const nodeEnv = process.env.NODE_ENV
+        // process.env.NODE_ENV = 'production'
+        // const devPersistence = require(process.cwd() + '/services/persistence/mongo')()
+        // console.log("devPersistence.deleteAllData:", devPersistence.deleteAllData)
+        // devPersistence.deleteAllData()
+        // process.env.NODE_ENV = nodeEnv
+
+      })
+
     }) // deleteAllData() checks
 
   describe('getName() checks', function () {
@@ -99,14 +116,13 @@ describe('Mongo facade Unit tests', function () {
       })
 
       it('Stored vote should appear in database', function () {
-        return votingSessions.find({
-          description: description
-        }).then(docs => {
-          docs.length.should.equal(1)
-          const session = docs[0]
-          session.channel_id.should.equal(channelId)
-          session.description.should.equal(description)
-        })
+        return votingSessions.find({ description: description })
+          .then(docs => {
+            docs.length.should.equal(1)
+            const session = docs[0]
+            session.channel_id.should.equal(channelId)
+            session.description.should.equal(description)
+          })
       })
     }) // setupVote() checks
 

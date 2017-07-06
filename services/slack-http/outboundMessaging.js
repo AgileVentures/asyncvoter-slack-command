@@ -5,7 +5,7 @@ function start(text) {
     'text': `<!here> ASYNC VOTE on "${text}"`,
     'attachments': [{
       'text': 'Please choose a difficulty',
-      // 'fallback': 'Woops! Something bad happens!',
+      'fallback': 'Woops! Something bad happens!',
       'callback_id': 'voting_session',
       'color': '#3AA3E3',
       'attachment_type': 'default',
@@ -43,7 +43,7 @@ function reveal(text, votes) {
 
   const msg = {
     'response_type': 'in_channel',
-    'text': `${text} \n${result}`
+    'text': `${text}\n${result}`
   }
 
   return msg
@@ -93,11 +93,11 @@ function receiveVote(text, votes) {
         'type': 'button',
         'value': 'No-opinion'
       }, {
-        'name': 'reveal',
+        'name': 'Reveal',
         'text': 'Reveal',
         'style': 'danger',
         'type': 'button',
-        'value': 'reveal',
+        'value': 'Reveal',
         'confirm': {
           'title': 'Are you sure?',
           'text': 'This will reveal all the votes',

@@ -15,6 +15,28 @@ This needs be added to the start of the deleteAllData function
 deleteAllData is **extremely** dangerous, and we really need to ensure it is **never**
 called on production data
 
+## Problems with tests getting in each other's way - deleteAllData
+
+Because of the somewhat asynchronous nature of testing, you sometimes see this:
+
+```
+  58 passing (471ms)
+  1 failing
+
+  1) Old tests to be reviewed/refactored Persistence Record a vote to a restarted session:
+
+      AssertionError: expected '0 votes so far [  ]' to equal '1 vote so far [ @User 1 ]'
+      + expected - actual
+
+      -0 votes so far [  ]
+      +1 vote so far [ @User 1 ]
+      
+      at castVote.then.res (test/old/old_integration_tests.js:204:31)
+      at process._tickCallback (internal/process/next_tick.js:103:7)
+```
+
+We need to refactor where and how deleteAllData is being used to avoid this from being a possibility
+
 ## Misc
 
 ECMAScript v6 - http://www.ecma-international.org/ecma-262/6.0/
