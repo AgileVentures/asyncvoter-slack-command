@@ -26,6 +26,14 @@ describe.skip() DOES NOT WORK the way you expect :(
 - Check what IDs slack provides
 
 
+## Git commits not showing as activity
+
+- https://help.github.com/articles/why-are-my-contributions-not-showing-up-on-my-profile/
+- https://help.github.com/articles/about-pull-request-merges/
+- Merge without squashing
+
+
+
 ## Documentation
 
 - Documentation is brought up-to-date with experimental branch before pushing/merging
