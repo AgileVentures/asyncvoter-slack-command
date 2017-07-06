@@ -15,6 +15,7 @@ Mocha/Chai "Cheat sheet" - http://samwize.com/2014/02/08/a-guide-to-mochas-descr
 
 Singleton classes in ES6 - http://amanvirk.me/singleton-classes-in-es6/
 
+describe.skip() DOES NOT WORK the way you expect :(
 
 ## Asynchronous Timing issues
 
