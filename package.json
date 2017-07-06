@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "test": "nyc mocha --recursive ./test/test-defaults.js ./test",
     "old": "nyc mocha --recursive ./test/test-defaults.js ./test/old",
+    "new": "nyc mocha --recursive ./test/test-defaults.js ./test/services",
     "nyc": "nyc report"
   },
   "engines": {
