@@ -30,7 +30,7 @@ Because of the somewhat asynchronous nature of testing, you sometimes see this:
 
       -0 votes so far [  ]
       +1 vote so far [ @User 1 ]
-      
+
       at castVote.then.res (test/old/old_integration_tests.js:204:31)
       at process._tickCallback (internal/process/next_tick.js:103:7)
 ```
@@ -52,6 +52,9 @@ ECMAScript v7 - http://www.ecma-international.org/ecma-262/7.0/
 ECMAScript current version - http://www.ecma-international.org/ecma-262/
 
 Mocha/Chai "Cheat sheet" - http://samwize.com/2014/02/08/a-guide-to-mochas-describe-it-and-setup-hooks/
+
+
+https://stackoverflow.com/questions/367768/how-to-detect-if-a-function-is-called-as-constructor/31060154#31060154
 
 ## Mocha issues
 

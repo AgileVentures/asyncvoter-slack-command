@@ -8,11 +8,11 @@
 if (!process.env.NODE_ENV) process.env.NODE_ENV = "production"
 
 
-if (require.main === module) {
-  console.log('called directly');
-} else {
-  console.log('required as a module');
-}
+// if (require.main === module) {
+//   console.log('called directly');
+// } else {
+//   console.log('required as a module');
+// }
 
 const db = require('./services/persistence')('mongo')
 const slackWebService = require('./services/slack-http')(db)
