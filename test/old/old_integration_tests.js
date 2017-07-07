@@ -1,5 +1,5 @@
 const servicesDir = process.cwd() + "/services/"
-const persistence = require(servicesDir + "persistence")()
+const persistence = require(servicesDir + "persistence").getInstance(null, { env: "test" })
 const app = require(servicesDir + "slack-http")(persistence)
 
 
