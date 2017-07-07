@@ -20,7 +20,7 @@ const formatMessage = require('./slack-http/outboundMessaging')
 
 module.exports = (persistence, configOptions) => {
 
-  const port = (configOptions) ? configOptions.port || defaultPort : defaultPort
+  const port = process.env.PORT || (configOptions) ? configOptions.port || defaultPort : defaultPort
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
