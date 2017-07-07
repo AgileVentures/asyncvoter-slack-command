@@ -49,8 +49,7 @@ function getStartDate(store, options) {
   const storeToUse = storeDefined ? store : config.persistence.default
   const instanceLabel = storeToUse + (testing ? "-test" : "-production")
 
-  if (!startDates.has(instanceLabel))
-    throw new Error("persistence instance must be instantiated first!")
+  if (!startDates.has(instanceLabel)) getInstance(store, options)
 
   return startDates.get(instanceLabel)
 }
