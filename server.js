@@ -14,5 +14,7 @@ if (!process.env.NODE_ENV) process.env.NODE_ENV = "production"
 //   console.log('required as a module');
 // }
 
-const db = require('./services/persistence')('mongo')
-const slackWebService = require('./services/slack-http')(db)
+const persistence =
+  require('./services/persistence')
+  .getInstance('mongo', { env: process.env.NODE_ENV })
+const slackWebService = require('./services/slack-http')(persistence)
