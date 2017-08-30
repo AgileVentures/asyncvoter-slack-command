@@ -10,6 +10,7 @@ module.exports = (app, repository) => {
   })
 
   app.get('/oauth', (req, res) => {
+    console.log(req)
     if (!req.query.code) {
       res.status(500)
       res.send({ 'Error': "Looks like we're not getting code." })
@@ -30,6 +31,7 @@ module.exports = (app, repository) => {
   })
 
   app.post('/commands', (req, res) => {
+    console.log(req)
     const text = req.body.text
     const channel_id = req.body.channel_id
 
@@ -43,6 +45,7 @@ module.exports = (app, repository) => {
   })
 
   app.post('/actions', (req, res) => {
+    console.log(req)
     const payload = JSON.parse(req.body.payload)
 
     const actions = payload.actions
