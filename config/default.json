@@ -1,0 +1,22 @@
+{
+  // Persistence layer defaults
+  "persistence": {
+    "default": "mongo",
+    "mongo": {
+      "host": "localhost",
+      "port": 27017,
+      "database": "asyncvoter-dev"
+    },
+    "redis": {
+      "host": "localhost",
+      "port": 6379
+    }
+  },
+  // Web server that handles messages from Slack
+  "slack-http": {
+    "client_id": "1234567890",
+    "client_secret": "TheQuickBrownFoxJumpsOverTheLazyDog",
+    "port": 4390
+  }
+
+}

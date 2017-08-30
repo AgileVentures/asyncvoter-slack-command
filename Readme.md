@@ -1,8 +1,25 @@
-Slack app for Voting on Stories and Tickets remotely and asynchronously.
+# Slack app for Voting on Stories and Tickets remotely and asynchronously.
 
 AsyncVoter allows an entire Slack team to vote on an issue. AsyncVoter keeps track of the votes and keeps them secret until you're ready to reveal the results. This means the your team does not have to be on Slack at the same time. They can vote asynchronously.
 
 You can vote on any thing: you just provide some text to display. (You can include a line, for example, to a project task.)
+
+
+# Zsuark experimental
+
+This is an experimental branch by Raphael Krausz - but feel free to join me.
+
+### Implementing DI for persistence
+
+Currently I am implementing putting a dependency injection pattern onto the persistence layer.
+
+### Outcomes:
+
+- Mongo and Redis can be used interchangeably.
+- Interoperability with other databases / persistence stores can be added in with minimal effort.
+- Write an interface to the store and inject it in as the persistence layer.
+
+#
 
 ## Usage
 
