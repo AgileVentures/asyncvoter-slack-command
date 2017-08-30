@@ -64,8 +64,8 @@ module.exports = (app, repository) => {
     console.log('/actions')
     console.log(req.body)
 
-    if(!verifyAuthentic(req.body, process.env.VALIDATION_TOKEN)) {
-      logger.error("Called with wrong verification token");
+    if(!verifyAuthentic(req.body.payload, process.env.VALIDATION_TOKEN)) {
+      console.log("Called with wrong verification token");
       res.status(403).send("Not called by Slack");
       return;
     }
