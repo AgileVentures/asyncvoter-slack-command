@@ -17,8 +17,7 @@ module.exports = (app, repository) => {
   })
 
   app.get('/oauth', (req, res) => {
-    console.log('/oauth')
-    console.log(req)
+
     if (!req.query.code) {
       res.status(500)
       res.send({ 'Error': "Looks like we're not getting code." })
@@ -39,8 +38,6 @@ module.exports = (app, repository) => {
   })
 
   app.post('/commands', (req, res) => {
-    console.log('/commands')
-    console.log(req.body)
 
     if(!verifyAuthentic(req.body, process.env.VALIDATION_TOKEN)) {
       logger.error("Called with wrong verification token");
@@ -61,8 +58,6 @@ module.exports = (app, repository) => {
   })
 
   app.post('/actions', (req, res) => {
-    console.log('/actions')
-    console.log(req.body)
 
     if(!verifyAuthentic(JSON.parse(req.body.payload), process.env.VALIDATION_TOKEN)) {
       console.log("Called with wrong verification token");
