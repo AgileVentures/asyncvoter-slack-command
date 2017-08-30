@@ -1,8 +1,9 @@
 require('dotenv').config({ path: './.env.example' })
 
-const app = require('./index').app
-const server = require('./index').server
-const db = require('./index').db
+const index = require('./index')
+const app = index.app
+const server = index.server
+const db = index.db
 
 const chai = require('chai')
 const should = chai.should()
@@ -16,24 +17,29 @@ const client_id = process.env.CLIENT_ID
 const client_secret = process.env.CLIENT_SECRET
 const code = 1;
 
-describe('Landing page', () => {
-  it('Display Slack button', (done) => {
-    chai.request(server)
+const throwErr = err => {
+  throw err;
+}
+
+describe('Landing page', function () {
+  it('Display Slack button', function () {
+
+    return chai.request(server)
       .get('/')
-      .end((err, res) => {
+      .send()
+      .then(res => {
         res.should.have.status(200)
         res.should.be.html
         res.text.should.have.string(client_id)
-
-        done()
       })
+      .catch(throwErr)
   })
 })
 
-describe('Install app', () => {
-  it('Authorize the app', (done) => {
+describe('Install app', function () {
+  it('Authorize the app', function () {
 
-    // Given: External requests are mocked
+    // External requests are mocked
     nock('https://slack.com')
       .get('/api/oauth.access')
       .query({ code, client_id, client_secret })
@@ -42,25 +48,28 @@ describe('Install app', () => {
     chai.request(app)
       .get('/oauth')
       .query({ code, client_id, client_secret })
-      .end((err, res) => {
+      .send()
+      .then(res => {
         res.should.redirect
-
-        done()
       })
+      .catch(throwErr)
   })
 })
 
-describe('Run a voting session', () => {
 
-  before((done) => {
-    db.flushdb(done);
-  })
+describe('Run a voting session', function () {
 
-  it('Start a voting session', (done) => {
+  before(
+    function () {
+      return db.flushdbAsync()
+    })
+
+  it('Start a voting session', function () {
     chai.request(app)
       .post('/commands')
       .send({ text: 'Feature 1', channel_id: 1 })
-      .end((err, res) => {
+      .then(res => {
+
         res.should.have.status(200)
         res.should.be.json
         res.should.have.property('text')
@@ -75,12 +84,12 @@ describe('Run a voting session', () => {
         actions[1].value.should.equals('Medium')
         actions[2].value.should.equals('Hard')
         actions[3].value.should.equals('No-opinion')
-        done()
       })
+      .catch(throwErr)
   })
 
-  it('Record a vote', (done) => {
-    chai.request(app)
+  it('Record a vote', function () {
+    return chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
@@ -90,7 +99,7 @@ describe('Run a voting session', () => {
           original_message: { text: 'Feature 1' }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
         res.body.attachments[0].text.should.have.string('1 vote')
@@ -100,12 +109,11 @@ describe('Run a voting session', () => {
         res.body.attachments[0].actions[2].value.should.equals('Hard')
         res.body.attachments[0].actions[3].value.should.equals('No-opinion')
         res.body.attachments[0].actions[4].value.should.equals('reveal')
-
-        done()
       })
+      .catch(throwErr)
   })
 
-  it('Reveal the results', (done) => {
+  it('Reveal the results', () => {
     chai.request(app)
       .post('/actions')
       .send({
@@ -116,83 +124,93 @@ describe('Run a voting session', () => {
           original_message: { text: 'Feature 1' }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
         res.body.text.should.have.string('Medium')
-
-        done()
       })
+      .catch(throwErr)
   })
 })
 
 
-describe('Run single-user multi-votes', () => {
+describe('Run single-user multi-votes', function () {
 
-  before((done) => {
+  const voteLabel = '14_change_my_vote'
+  const channelId = '14_test_channel'
+
+  before(function () {
     // Clear the database and set up the voting session
-    db.flushdb(function () {
-      chai.request(app)
-        .post('/commands')
-        .send({ text: '14_change_my_vote', channel_id: 14 })
-        .end((err, res) => {
-          done()
-        })
-
-    })
+    return db.flushdbAsync()
+      .then(res => {
+        return chai.request(app)
+          .post('/commands')
+          .send({ text: voteLabel, channel_id: channelId })
+      })
+      .then(res => {
+        return Promise.resolve(res)
+      })
   })
 
-  const makeVote = function (username, actionValue, next) {
-    chai.request(app)
+  // Makes a promise to the response text of a vote cast via HTTP
+  function makeVote(username, actionValue) {
+
+    return chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
-          channel: { id: 14 },
+          channel: { id: channelId },
           actions: [{ value: actionValue }],
           user: { name: username },
-          original_message: { text: '14_change_my_vote' }
+          original_message: { text: voteLabel }
         })
       })
-      .end((err, res) => {
-        if (err) {
-          console.err("Error in makeVote:", err)
-          return err;
-        }
-        var responseText = res.body.attachments[0].text
-        next(responseText)
-      })
+
   }
 
+
   it('Test double voting by user', function (done) {
-    makeVote('Zsuark', 'Simple', function (responseText) {
-      responseText.should.startWith('1 vote(s)')
-      responseText.should.have.entriesCount('Zsuark', 1)
-      makeVote('tansaku', 'Medium', function (responseText) {
-        responseText.should.startWith('2 vote(s)')
+
+    makeVote('Zsuark', 'Simple')
+      .then(result => {
+        result.body.text.should.contain(voteLabel)
+        let responseText = result.body.attachments[0].text
+        responseText.should.startWith('1 vote')
+        responseText.should.have.entriesCount('Zsuark', 1)
+        return makeVote('tansaku', 'Medium')
+      })
+      .then(result => {
+        let responseText = result.body.attachments[0].text
+        responseText.should.startWith('2 votes')
         responseText.should.have.entriesCount('Zsuark', 1)
         responseText.should.have.entriesCount('tansaku', 1)
-        makeVote('Zsuark', 'Medium', function (responseText) {
-          responseText.should.startWith('2 vote(s)')
-          responseText.should.have.entriesCount('Zsuark', 1)
-          responseText.should.have.entriesCount('tansaku', 1)
-          done()
-        })
+        return makeVote('Zsuark', 'Medium')
       })
-    })
+      .then(result => {
+        let responseText = result.body.attachments[0].text
+        responseText.should.startWith('2 votes')
+        responseText.should.have.entriesCount('Zsuark', 1)
+        responseText.should.have.entriesCount('tansaku', 1)
+        done()
+      })
+      .catch(err => {
+        done(err)
+      })
   })
 
-  it('Confirm the results', (done) => {
-    chai.request(app)
+
+  it('Confirm the results', function (done) {
+    let request = chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
-          channel: { id: 14 },
+          channel: { id: channelId },
           actions: [{ value: 'reveal' }],
           user: { name: 'Zsuark' },
-          original_message: { text: '14_change_my_vote' }
+          original_message: { "text": voteLabel }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
         const responseText = res.body.text
@@ -202,51 +220,73 @@ describe('Run single-user multi-votes', () => {
         responseText.should.have.entriesCount('Zsuark', 1)
         done()
       })
+      .catch(err => {
+        done(err)
+      })
+
   })
-
-
-
 
 })
 
 
-describe('Persistence', (done) => {
+describe('Persistence', function () {
 
-  before((done) => {
+  const channelId = "testChannel1"
 
-    db.flushdb(() => {
-      let votes = {}
-      votes['User 1'] = 'Simple'
-      db.set(1, JSON.stringify(votes), (err, value) => {
-        done()
+  before(function () {
+    db.flushdbAsync()
+      .then(result => {
+        return db.setupVote(channelId, "Test Vote")
       })
-    });
-
+      .then(result => {
+        return db.giveVote(channelId, "User 1", "Simple")
+      })
+      .then(result => {})
+      .catch(throwErr)
   })
 
-  it('Record a vote to a restarted session', (done) => {
+
+  it('Record a vote to a restarted session', function (done) {
+
     chai.request(app)
       .post('/actions')
       .send({
         payload: JSON.stringify({
-          channel: { id: 1 },
+          channel: { id: channelId },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 2' },
           original_message: { text: 'Feature 1' }
         })
       })
-      .end((err, res) => {
+      .then(res => {
         res.should.have.status(200)
         res.should.be.json
-        res.body.attachments[0].text.should.have.string('2 vote')
-        res.body.attachments[0].text.should.have.string('User 1')
-        res.body.attachments[0].text.should.have.string('User 2')
-
+        const responseText = res.body.attachments[0].text
+        responseText.should.have.string('2 votes')
+        responseText.should.have.string('User 1')
+        responseText.should.have.string('User 2')
+        return chai.request(app)
+          .post('/actions')
+          .send({
+            payload: JSON.stringify({
+              channel: { id: channelId },
+              actions: [{ value: 'reveal' }],
+              user: { name: 'User 1' },
+              original_message: { text: 'Feature 1' }
+            })
+          })
+      })
+      .then(res => {
+        res.should.have.status(200)
+        res.should.be.json
+        const responseText = res.body.text
+        responseText.should.have.string('User 1 Simple')
+        responseText.should.have.string('User 2 Medium')
         done()
+      })
+      .catch(err => {
+        done(err)
       })
   })
 
 })
-
-// Zsuark - 20170317 - Is this pprint function ever used?
-const pprint = (json) => JSON.stringify(json, null, '\t')

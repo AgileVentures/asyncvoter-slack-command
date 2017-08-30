@@ -17,10 +17,12 @@
   "author": "AgileVentures",
   "license": "MIT",
   "dependencies": {
+    "bluebird": "^3.5.0",
     "body-parser": "^1.16.0",
     "dotenv": "^4.0.0",
     "ejs": "^2.5.5",
     "express": "^4.14.0",
+    "monk": "^6.0.0",
     "redis": "^2.6.5",
     "request": "^2.79.0"
   },

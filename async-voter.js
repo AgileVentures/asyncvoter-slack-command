@@ -3,72 +3,104 @@ const request = require('request')
 const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 
-module.exports = (app, repository) => {
+module.exports = (app, db) => {
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
   })
 
-  app.get('/oauth', (req, res) => {
-    if (!req.query.code) {
+  // callback chaining - let's favour composition
+  app.get('/oauth', (req, res, next) => {
+    if (req.query.code) next()
+    else {
       res.status(500)
       res.send({ 'Error': "Looks like we're not getting code." })
-    } else {
-      request({
-        url: 'https://slack.com/api/oauth.access',
-        qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
-        method: 'GET'
-      }, (error, response, body) => {
-        if (error) {
-          res.status(500)
-          res.send({ 'Error': error })
-        } else {
-          res.redirect('/')
-        }
-      })
     }
+  }, (req, res, next) => {
+
+    // Candidate for promise
+    // Need to be able to wrap the request object in a promise,
+    // or use a promise friendly version
+    request({
+      url: 'https://slack.com/api/oauth.access',
+      qs: { code: req.query.code, client_id: clientId, client_secret: clientSecret },
+      method: 'GET'
+    }, (error, response, body) => {
+      if (error) {
+        res.status(500)
+        res.send({ 'Error': error })
+      } else {
+        res.redirect('/')
+      }
+    })
+
   })
 
-  app.post('/commands', (req, res) => {
+
+  // /commands starts a new vote on the given channel
+  app.post('/commands', (req, res, next) => {
+
     const text = req.body.text
     const channel_id = req.body.channel_id
 
-    // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id, (err, reply) => {
-      // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id, JSON.stringify({}), (err, reply) => {
+    db.setupVote(channel_id, text)
+      .then(result => {
         res.send(formatStart(text))
       })
-    })
+      .catch(e => {
+        next(e)
+      })
   })
 
-  app.post('/actions', (req, res) => {
+
+  // /actions receives an action regarding an existing
+  // voting session
+  // An action may either be:
+  // A vote being case OR a request to reveal votes
+  app.post('/actions', (req, res, next) => {
+    // Reveal votes
     const payload = JSON.parse(req.body.payload)
 
-    const actions = payload.actions
+    req.jsonPayload = payload
+    const text = payload.original_message.text
+    const action = payload.actions[0].value
+    if (action == 'reveal') {
+      const channel_id = payload.channel.id
+
+      db.getVotes(channel_id)
+        .then(votes => {
+          res.send(formatResult(text, votes))
+        })
+        .catch(err => {
+          next(err)
+        })
+
+    } else next();
+  }, (req, res, next) => {
+    // We have received a vote
+
+    const payload = req.jsonPayload
     const text = payload.original_message.text
     const user = payload.user.name
     const channel_id = payload.channel.id
+    const vote = payload.actions[0].value
 
-    repository.get(channel_id, (err, reply) => {
-      const votes = JSON.parse(reply) || {}
+    db.giveVote(channel_id, user, vote)
+      .then(result => {
+        return db.getVotes(channel_id)
+      })
+      .then(votes => {
+        res.send(formatRegister(text, votes))
+      })
+      .catch(err => {
+        next(err)
+      })
 
-      if (actions[0].value === 'reveal') {
-        res.send(formatResult(text, votes))
-      } else {
-        // TODO: Count vote for different voting sessions
 
-        votes[user] = actions[0].value
-
-        repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
-          res.send(formatRegister(text, votes))
-        })
-      }
-    })
   })
 
-  const formatStart = (text) => {
-    const msg = {
+  function formatStart(text) {
+    return {
       'response_type': 'in_channel',
       'text': `<!here> ASYNC VOTE on "${text}"`,
       'attachments': [{
@@ -100,11 +132,9 @@ module.exports = (app, repository) => {
         }]
       }]
     }
-
-    return msg
   }
 
-  const formatResult = (text, votes) => {
+  function formatResult(text, votes) {
 
     const result = Object.keys(votes).map((user) => {
       return `\n@${user} ${votes[user]}`
@@ -118,19 +148,25 @@ module.exports = (app, repository) => {
     return msg
   }
 
-  const formatRegister = (text, votes) => {
+  function formatRegister(text, votes) {
 
     // A set of all users who have voted
-    const users = Object.keys(votes).map((user) => {
+    const userList = Object.keys
+(votes).map((user) => {
       return "@" + user
     })
+    const voteCount = userList.length
+    const users = userList.join(", ")
+
+    const voteText = "" + voteCount + " vote" + ((voteCount == 1) ? "" : "s") +
+      " so far [ " + users + " ]"
 
 
-    const msg = {
+    return {
       'response_type': 'in_channel',
       'text': text,
       'attachments': [{
-        'text': `${users.length} vote(s) so far [${users}]`,
+        'text': voteText,
         'fallback': 'Woops! Something bad happens!',
         'callback_id': 'voting_session',
         'color': '#3AA3E3',
@@ -171,7 +207,5 @@ module.exports = (app, repository) => {
         }]
       }]
     }
-
-    return msg
   }
 }
