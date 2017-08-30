@@ -23,7 +23,7 @@
     "express": "^4.14.0",
     "redis": "^2.6.5",
     "request": "^2.79.0",
-    "scmp": "^2.0.0"
+    "scmp": "~1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
