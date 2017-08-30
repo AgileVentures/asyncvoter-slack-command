@@ -6,7 +6,7 @@ coordinate the work that is happening and that needs to happen. This also descri
 
 First be sure that you've set up your development environment following all the steps in the ReadMe.
 
-We use [Waffle](https://waffle.io/AgileVentures/async-voter-slack-command) to manage our work on features, chores and bugfixes.
+We use [Waffle](https://waffle.io/AgileVentures/asyncvoter-slack-command) to manage our work on features, chores and bugfixes.
 
 We keep our code on [GitHub](http://github.com) and use [git](https://git-scm.com) for version control.
 
