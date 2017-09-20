@@ -3,6 +3,13 @@ const request = require('request')
 const clientId = process.env.CLIENT_ID
 const clientSecret = process.env.CLIENT_SECRET
 
+var scmp = require('scmp');
+
+function verifyAuthentic(msg, token) {
+  // Safe constant-time comparison of token
+  return scmp(msg.token, token);
+}
+
 module.exports = (app, repository) => {
 
   app.get('/', (req, res) => {
@@ -10,6 +17,7 @@ module.exports = (app, repository) => {
   })
 
   app.get('/oauth', (req, res) => {
+
     if (!req.query.code) {
       res.status(500)
       res.send({ 'Error': "Looks like we're not getting code." })
@@ -30,6 +38,13 @@ module.exports = (app, repository) => {
   })
 
   app.post('/commands', (req, res) => {
+
+    if(!verifyAuthentic(req.body, process.env.VALIDATION_TOKEN)) {
+      logger.error("Called with wrong verification token");
+      res.status(403).send("Not called by Slack");
+      return;
+    }
+
     const text = req.body.text
     const channel_id = req.body.channel_id
 
@@ -43,6 +58,13 @@ module.exports = (app, repository) => {
   })
 
   app.post('/actions', (req, res) => {
+
+    if(!verifyAuthentic(JSON.parse(req.body.payload), process.env.VALIDATION_TOKEN)) {
+      console.log("Called with wrong verification token");
+      res.status(403).send("Not called by Slack");
+      return;
+    }
+
     const payload = JSON.parse(req.body.payload)
 
     const actions = payload.actions
