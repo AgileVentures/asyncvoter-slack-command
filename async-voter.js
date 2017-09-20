@@ -29,6 +29,8 @@ module.exports = (app, repository) => {
     }
   })
 
+
+  // `/voter name of issue http://example.com/ticket_id`
   app.post('/commands', (req, res) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
@@ -79,17 +81,17 @@ module.exports = (app, repository) => {
         'attachment_type': 'default',
         'actions': [{
           'name': 'Simple',
-          'text': 'Simple',
+          'text': 'Simple (1)',
           'type': 'button',
           'value': 'Simple'
         }, {
           'name': 'Medium',
-          'text': 'Medium',
+          'text': 'Medium (2)',
           'type': 'button',
           'value': 'Medium'
         }, {
           'name': 'Hard',
-          'text': 'Hard',
+          'text': 'Hard (3)',
           'type': 'button',
           'value': 'Hard'
         }, {
