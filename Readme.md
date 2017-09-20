@@ -6,7 +6,7 @@ You can vote on any thing: you just provide some text to display. (You can inclu
 
 ## Usage
 
-1. Install this app to your Slack team visiting http://asyncvoter.tk and pressing on the `Add to Slack` button.
+1. Install this app to your Slack team visiting https://production.asyncvoter.agileventures.org and pressing on the `Add to Slack` button.
 2. Run a voting session on an issue launching the new `/voter issue` command in any channel.
 3. Submit your vote pressing on any of the three difficulty buttons (Easy, Medium or Hard).
 4. Finish and reveal the result of the voting session by pressing on the `Reveal` button. (We recommend to wait until you will receive 3 or more votes)
