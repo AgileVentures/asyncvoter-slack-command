@@ -23,15 +23,17 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 ## Requirements
 
 - [Redis](https://redis.io/) v3.2.8 or later
-- [Node](https://nodejs.org) v7.6.0 or later
+- [Node](https://nodejs.org) v7.4.0 or later
 
 ## Development
 
 1. Install dependencies `npm install`
 
-2. Run tests `npm test`
+2. copy `.env.example` to `.env`
 
-3. Run the server `npm run dev`
+3. Run tests `npm test`
+
+4. Run the server `npm run dev`
 
 You **need** to set up your own Slack **team** and Slack **app** to continue!
 
