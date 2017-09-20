@@ -59,7 +59,7 @@ describe('Run a voting session', () => {
   it('Start a voting session', (done) => {
     chai.request(app)
       .post('/commands')
-      .send({ text: 'Feature 1', channel_id: 1 })
+      .send({ text: 'Feature 1', channel_id: 1, token: process.env.VALIDATION_TOKEN })
       .end((err, res) => {
         res.should.have.status(200)
         res.should.be.json
@@ -87,7 +87,8 @@ describe('Run a voting session', () => {
           channel: { id: 1 },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 1' },
-          original_message: { text: 'Feature 1' }
+          original_message: { text: 'Feature 1' }, 
+          token: process.env.VALIDATION_TOKEN
         })
       })
       .end((err, res) => {
@@ -113,7 +114,8 @@ describe('Run a voting session', () => {
           channel: { id: 1 },
           actions: [{ value: 'reveal' }],
           user: { name: 'User 1' },
-          original_message: { text: 'Feature 1' }
+          original_message: { text: 'Feature 1' }, 
+          token: process.env.VALIDATION_TOKEN
         })
       })
       .end((err, res) => {
@@ -134,7 +136,7 @@ describe('Run single-user multi-votes', () => {
     db.flushdb(function () {
       chai.request(app)
         .post('/commands')
-        .send({ text: '14_change_my_vote', channel_id: 14 })
+        .send({ text: '14_change_my_vote', channel_id: 14, token: process.env.VALIDATION_TOKEN })
         .end((err, res) => {
           done()
         })
@@ -150,7 +152,8 @@ describe('Run single-user multi-votes', () => {
           channel: { id: 14 },
           actions: [{ value: actionValue }],
           user: { name: username },
-          original_message: { text: '14_change_my_vote' }
+          original_message: { text: '14_change_my_vote' }, 
+          token: process.env.VALIDATION_TOKEN
         })
       })
       .end((err, res) => {
@@ -189,7 +192,8 @@ describe('Run single-user multi-votes', () => {
           channel: { id: 14 },
           actions: [{ value: 'reveal' }],
           user: { name: 'Zsuark' },
-          original_message: { text: '14_change_my_vote' }
+          original_message: { text: '14_change_my_vote' }, 
+          token: process.env.VALIDATION_TOKEN
         })
       })
       .end((err, res) => {
@@ -232,7 +236,8 @@ describe('Persistence', (done) => {
           channel: { id: 1 },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 2' },
-          original_message: { text: 'Feature 1' }
+          original_message: { text: 'Feature 1' }, 
+          token: process.env.VALIDATION_TOKEN
         })
       })
       .end((err, res) => {
