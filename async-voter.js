@@ -69,17 +69,7 @@ module.exports = (app, repository) => {
     })
   })
 
-  const formatStart = (text) => {
-    const msg = {
-      'response_type': 'in_channel',
-      'text': `<!here> ASYNC VOTE on "${text}"`,
-      'attachments': [{
-        'text': 'Please choose a difficulty',
-        'fallback': 'Woops! Something bad happens!',
-        'callback_id': 'voting_session',
-        'color': '#3AA3E3',
-        'attachment_type': 'default',
-        'actions': [{
+  const ACTIONS = [{
           'name': 'Simple',
           'text': 'Simple (1)',
           'type': 'button',
@@ -100,6 +90,18 @@ module.exports = (app, repository) => {
           'type': 'button',
           'value': 'No-opinion'
         }]
+
+  const formatStart = (text) => {
+    const msg = {
+      'response_type': 'in_channel',
+      'text': `<!here> ASYNC VOTE on "${text}"`,
+      'attachments': [{
+        'text': 'Please choose a difficulty',
+        'fallback': 'Woops! Something bad happens!',
+        'callback_id': 'voting_session',
+        'color': '#3AA3E3',
+        'attachment_type': 'default',
+        'actions': ACTIONS
       }]
     }
 
@@ -137,28 +139,7 @@ module.exports = (app, repository) => {
         'callback_id': 'voting_session',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': [{
-          'name': 'Simple',
-          'text': 'Simple',
-          'type': 'button',
-          'value': 'Simple'
-        }, {
-          'name': 'Medium',
-          'text': 'Medium',
-          'type': 'button',
-          'value': 'Medium'
-
-        }, {
-          'name': 'Hard',
-          'text': 'Hard',
-          'type': 'button',
-          'value': 'Hard'
-        }, {
-          'name': 'No-opinion',
-          'text': 'No-opinion',
-          'type': 'button',
-          'value': 'No-opinion'
-        }, {
+        'actions': [...ACTIONS, {
           'name': 'reveal',
           'text': 'Reveal',
           'style': 'danger',

@@ -98,11 +98,15 @@ describe('Run a voting session', () => {
         res.should.be.json
         res.body.attachments[0].text.should.have.string('1 vote')
         res.body.attachments[0].text.should.have.string('User 1')
-        res.body.attachments[0].actions[0].value.should.equals('Simple')
-        res.body.attachments[0].actions[1].value.should.equals('Medium')
-        res.body.attachments[0].actions[2].value.should.equals('Hard')
-        res.body.attachments[0].actions[3].value.should.equals('No-opinion')
-        res.body.attachments[0].actions[4].value.should.equals('reveal')
+        const actions = res.body.attachments[0].actions
+        actions[0].value.should.equals('Simple')
+        actions[1].value.should.equals('Medium')
+        actions[2].value.should.equals('Hard')
+        actions[3].value.should.equals('No-opinion')
+        actions[4].value.should.equals('reveal')
+        actions[0].text.should.equals('Simple (1)')
+        actions[1].text.should.equals('Medium (2)')
+        actions[2].text.should.equals('Hard (3)')
 
         done()
       })
