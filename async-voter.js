@@ -37,6 +37,8 @@ module.exports = (app, repository) => {
     }
   })
 
+
+  // `/voter name of issue http://example.com/ticket_id`
   app.post('/commands', (req, res) => {
 
     if(!verifyAuthentic(req.body, process.env.VALIDATION_TOKEN)) {
@@ -89,6 +91,28 @@ module.exports = (app, repository) => {
     })
   })
 
+  const ACTIONS = [{
+          'name': 'Simple',
+          'text': 'Simple (1)',
+          'type': 'button',
+          'value': 'Simple'
+        }, {
+          'name': 'Medium',
+          'text': 'Medium (2)',
+          'type': 'button',
+          'value': 'Medium'
+        }, {
+          'name': 'Hard',
+          'text': 'Hard (3)',
+          'type': 'button',
+          'value': 'Hard'
+        }, {
+          'name': 'No-opinion',
+          'text': 'No-opinion',
+          'type': 'button',
+          'value': 'No-opinion'
+        }]
+
   const formatStart = (text) => {
     const msg = {
       'response_type': 'in_channel',
@@ -99,27 +123,7 @@ module.exports = (app, repository) => {
         'callback_id': 'voting_session',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': [{
-          'name': 'Simple',
-          'text': 'Simple',
-          'type': 'button',
-          'value': 'Simple'
-        }, {
-          'name': 'Medium',
-          'text': 'Medium',
-          'type': 'button',
-          'value': 'Medium'
-        }, {
-          'name': 'Hard',
-          'text': 'Hard',
-          'type': 'button',
-          'value': 'Hard'
-        }, {
-          'name': 'No-opinion',
-          'text': 'No-opinion',
-          'type': 'button',
-          'value': 'No-opinion'
-        }]
+        'actions': ACTIONS
       }]
     }
 
@@ -157,28 +161,7 @@ module.exports = (app, repository) => {
         'callback_id': 'voting_session',
         'color': '#3AA3E3',
         'attachment_type': 'default',
-        'actions': [{
-          'name': 'Simple',
-          'text': 'Simple',
-          'type': 'button',
-          'value': 'Simple'
-        }, {
-          'name': 'Medium',
-          'text': 'Medium',
-          'type': 'button',
-          'value': 'Medium'
-
-        }, {
-          'name': 'Hard',
-          'text': 'Hard',
-          'type': 'button',
-          'value': 'Hard'
-        }, {
-          'name': 'No-opinion',
-          'text': 'No-opinion',
-          'type': 'button',
-          'value': 'No-opinion'
-        }, {
+        'actions': [...ACTIONS, {
           'name': 'reveal',
           'text': 'Reveal',
           'style': 'danger',
