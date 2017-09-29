@@ -82,8 +82,9 @@ module.exports = (app, repository) => {
       } else {
         // TODO: Count vote for different voting sessions
 
-        votes[user] = [actions[0].value,new Date().toISOString()]
+        votes[user] = {size: actions[0].value,timestamp: new Date().toISOString()}
 
+        console.log(JSON.stringify(votes))
         repository.set(channel_id + text, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
         })
@@ -136,7 +137,7 @@ module.exports = (app, repository) => {
   const formatResult = (text, votes) => {
 
     const result = Object.keys(votes).map((user) => {
-      return `\n@${user} ${votes[user][0]}`
+      return `\n@${user} ${votes[user]['size']}`
     })
 
     const msg = {
