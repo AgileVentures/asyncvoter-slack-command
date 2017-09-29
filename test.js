@@ -228,7 +228,7 @@ describe('Persistence', (done) => {
     db.flushdb(() => {
       let votes = {}
       votes['User 1'] = 'Simple'
-      db.set(1, JSON.stringify(votes), (err, value) => {
+      db.set("1Feature 1", JSON.stringify(votes), (err, value) => {
         done()
       })
     });

@@ -51,9 +51,9 @@ module.exports = (app, repository) => {
     const channel_id = req.body.channel_id
 
     // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id, (err, reply) => {
+    repository.del(channel_id + text, (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id, JSON.stringify({}), (err, reply) => {
+      repository.set(channel_id + text, JSON.stringify({}), (err, reply) => {
         res.send(formatStart(text))
       })
     })
@@ -74,7 +74,7 @@ module.exports = (app, repository) => {
     const user = payload.user.name
     const channel_id = payload.channel.id
 
-    repository.get(channel_id, (err, reply) => {
+    repository.get(channel_id + text, (err, reply) => {
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
@@ -84,12 +84,15 @@ module.exports = (app, repository) => {
 
         votes[user] = actions[0].value
 
-        repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
+        repository.set(channel_id + text, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
         })
       }
     })
   })
+
+
+  // localsupport_text: { tansaku: '1', mtc2013: 'medium'}
 
   const ACTIONS = [{
           'name': 'Simple',
