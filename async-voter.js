@@ -74,34 +74,19 @@ module.exports = (app, repository) => {
     const user = payload.user.name
     const channel_id = payload.channel.id
 
-    repository.get("votes for:"+channel_id + text, (err, reply) => {
+    repository.get(channel_id + text, (err, reply) => {
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
-        console.log("revealing results")
-        console.log(text)
-        console.log(votes)
         res.send(formatResult(text, votes))
       } else {
         // TODO: Count vote for different voting sessions
 
         votes[user] = actions[0].value
+        votes["timestamp-"+user] = new Date().toISOString()
 
-        console.log(JSON.stringify(votes))
-        repository.set("votes for:" + channel_id + text, JSON.stringify(votes), (err, reply) => {
+        repository.set(channel_id + text, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
-        })
-      }
-    })
-
-    repository.get("timestamps for:"+channel_id + text, (err, reply) => {
-      const timestamps = JSON.parse(reply) || {}
-      if(actions[0].value == 'reveal'){
-        //timestmap the big reveal?
-      }else{
-        timestamps[user] = new Date().toISOString()
-        console.log(JSON.stringify(timestamps))
-        repository.set("timestamps for:" + channel_id + text, JSON.stringify(timestamps), (err, reply) => {
         })
       }
     })
@@ -149,10 +134,17 @@ module.exports = (app, repository) => {
     return msg
   }
 
+  const isVote = function(key){
+    return key.match(/timestamp-/) == null
+  }
+
   const formatResult = (text, votes) => {
-    console.log("formating results")
-    console.log(votes)
-    const result = Object.keys(votes).map((user) => {
+
+
+    const actual_votes = Object.keys(votes)
+                        .filter( key => isVote(key) )
+                        .reduce( (res, key) => (res[key] = votes[key], res), {} );
+    const result = Object.keys(actual_votes).map((user) => {
       return `\n@${user} ${votes[user]}`
     })
 
@@ -167,7 +159,10 @@ module.exports = (app, repository) => {
   const formatRegister = (text, votes) => {
 
     // A set of all users who have voted
-    const users = Object.keys(votes).map((user) => {
+    const actual_votes = Object.keys(votes)
+                        .filter( key => isVote(key) )
+                        .reduce( (res, key) => (res[key] = votes[key], res), {} );
+    const users = Object.keys(actual_votes).map((user) => {
       return "@" + user
     })
 

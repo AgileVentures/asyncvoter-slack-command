@@ -90,7 +90,7 @@ describe('Run a voting session', () => {
           channel: { id: 1 },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 1' },
-          original_message: { text: 'Feature 1' }, 
+          original_message: { text: 'Feature 1' },
           token: process.env.VALIDATION_TOKEN
         })
       })
@@ -121,7 +121,7 @@ describe('Run a voting session', () => {
           channel: { id: 1 },
           actions: [{ value: 'reveal' }],
           user: { name: 'User 1' },
-          original_message: { text: 'Feature 1' }, 
+          original_message: { text: 'Feature 1' },
           token: process.env.VALIDATION_TOKEN
         })
       })
@@ -159,7 +159,7 @@ describe('Run single-user multi-votes', () => {
           channel: { id: 14 },
           actions: [{ value: actionValue }],
           user: { name: username },
-          original_message: { text: '14_change_my_vote' }, 
+          original_message: { text: '14_change_my_vote' },
           token: process.env.VALIDATION_TOKEN
         })
       })
@@ -199,7 +199,7 @@ describe('Run single-user multi-votes', () => {
           channel: { id: 14 },
           actions: [{ value: 'reveal' }],
           user: { name: 'Zsuark' },
-          original_message: { text: '14_change_my_vote' }, 
+          original_message: { text: '14_change_my_vote' },
           token: process.env.VALIDATION_TOKEN
         })
       })
@@ -243,7 +243,7 @@ describe('Persistence', (done) => {
           channel: { id: 1 },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 2' },
-          original_message: { text: 'Feature 1' }, 
+          original_message: { text: 'Feature 1' },
           token: process.env.VALIDATION_TOKEN
         })
       })
