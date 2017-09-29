@@ -31,9 +31,11 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 2. copy `.env.example` to `.env`
 
-3. Run tests `npm test`
+3. ensure [redis](https://redis.io/topics/quickstart) is running
 
-4. Run the server `npm run dev`
+4. Run tests `npm test`
+
+5. Run the server `npm run dev`
 
 You **need** to set up your own Slack **team** and Slack **app** to continue!
 
