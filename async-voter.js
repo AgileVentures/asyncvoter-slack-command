@@ -50,9 +50,10 @@ module.exports = (app, repository) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
 
-    console.log("hit command endpoint with text and channel_id")
+    console.log("hit command endpoint with text and channel_id and key")
     console.log(text)
     console.log(channel_id)
+    console.log(channel_id + text)
 
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id + text, (err, reply) => {
@@ -86,10 +87,11 @@ module.exports = (app, repository) => {
 
     repository.get(channel_id + ticket_description, (err, reply) => {
 
-      console.log("hit action endpoint with text and channel_id")
+      console.log("hit action endpoint with text and channel_id and key")
       console.log(text)
       console.log(channel_id)
-      
+      console.log(channel_id + ticket_description)
+
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
