@@ -258,7 +258,7 @@ describe('Persistence', (done) => {
       })
   })
 
-  it.only('Record the time of a vote', (done) => {
+  it('Record the time of a vote', (done) => {
     chai.request(app)
       .post('/actions')
       .send({
