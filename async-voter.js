@@ -50,6 +50,10 @@ module.exports = (app, repository) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
 
+    console.log("hit command endpoint with text and channel_id")
+    console.log(text)
+    console.log(channel_id)
+
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id + text, (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
@@ -78,9 +82,14 @@ module.exports = (app, repository) => {
       return text.replace(/^<!here> ASYNC VOTE on \"/,'').replace(/"$/,'')
     }
 
-    ticket_description = extractTicketDescription(text)
+    const ticket_description = extractTicketDescription(text)
 
     repository.get(channel_id + ticket_description, (err, reply) => {
+
+      console.log("hit action endpoint with text and channel_id")
+      console.log(text)
+      console.log(channel_id)
+      
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
