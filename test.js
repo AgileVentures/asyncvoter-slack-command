@@ -223,7 +223,7 @@ describe('Run single-user multi-votes', () => {
 
 describe('Persistence', (done) => {
 
-  before((done) => {
+  beforeEach((done) => {
 
     db.flushdb(() => {
       let votes = {}
@@ -243,7 +243,7 @@ describe('Persistence', (done) => {
           channel: { id: 1 },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 2' },
-          original_message: { text: 'Feature 1' },
+          original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
           token: process.env.VALIDATION_TOKEN
         })
       })
@@ -266,7 +266,7 @@ describe('Persistence', (done) => {
           channel: { id: 1 },
           actions: [{ value: 'Medium' }],
           user: { name: 'User 2' },
-          original_message: { text: 'Feature 1' },
+          original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
           token: process.env.VALIDATION_TOKEN
         })
       })
@@ -274,6 +274,7 @@ describe('Persistence', (done) => {
         db.get('1Feature 1', (err, reply) =>{
           votes = JSON.parse(reply) || {}
           votes.hasOwnProperty('timestamp-User 2').should.be.true
+          console.log(votes['timestamp-User 2'])
           isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false
           done()
         })

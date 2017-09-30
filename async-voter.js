@@ -74,7 +74,13 @@ module.exports = (app, repository) => {
     const user = payload.user.name
     const channel_id = payload.channel.id
 
-    repository.get(channel_id + text, (err, reply) => {
+    const extractTicketDescription = (text) => {
+      return text.replace(/^<!here> ASYNC VOTE on \"/,'').replace(/"$/,'')
+    }
+
+    ticket_description = extractTicketDescription(text)
+
+    repository.get(channel_id + ticket_description, (err, reply) => {
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
@@ -85,7 +91,7 @@ module.exports = (app, repository) => {
         votes[user] = actions[0].value
         votes["timestamp-"+user] = new Date().toISOString()
 
-        repository.set(channel_id + text, JSON.stringify(votes), (err, reply) => {
+        repository.set(channel_id + ticket_description, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
         })
       }
