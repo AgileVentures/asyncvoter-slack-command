@@ -258,6 +258,28 @@ describe('Persistence', (done) => {
       })
   })
 
+  it.only('Record the time of a vote', (done) => {
+    chai.request(app)
+      .post('/actions')
+      .send({
+        payload: JSON.stringify({
+          channel: { id: 1 },
+          actions: [{ value: 'Medium' }],
+          user: { name: 'User 2' },
+          original_message: { text: 'Feature 1' },
+          token: process.env.VALIDATION_TOKEN
+        })
+      })
+      .end((err, res) => {
+        db.get('1Feature 1', (err, reply) =>{
+          votes = JSON.parse(reply) || {}
+          votes.hasOwnProperty('timestamp-User 2').should.be.true
+          isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false
+          done()
+        })
+      })
+  })
+
 })
 
 // Zsuark - 20170317 - Is this pprint function ever used?
