@@ -214,74 +214,109 @@ describe('Run single-user multi-votes', () => {
         done()
       })
   })
-
-
-
-
 })
 
 
 describe('Persistence', (done) => {
+  context('begin a voting session', (done) => {
+    beforeEach((done) => {
 
-  beforeEach((done) => {
+      db.flushdb(() => {
+          done()
+      });
+    })
 
-    db.flushdb(() => {
-      let votes = {}
-      votes['User 1'] = 'Simple'
-      db.set("1Feature 1", JSON.stringify(votes), (err, value) => {
-        done()
-      })
-    });
+    it('Records when voting session began', (done) => {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: 'Feature 1', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+        .end((err, res) => {
+          db.get('1Feature 1', (err, reply) =>{
+            votes = JSON.parse(reply) || {}
+            votes.hasOwnProperty('timestamp-voting-session-start').should.be.true
+            isNaN(Date.parse(votes['timestamp-voting-session-start'])).should.be.false
+
+            done()
+          })
+        })
+    })
+
+    it('Records who began voting session', (done) => {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: 'Feature 1', user_name: 'tansaku', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+        .end((err, res) => {
+          db.get('1Feature 1', (err, reply) =>{
+            votes = JSON.parse(reply) || {}
+            votes.hasOwnProperty('user-voting-session-initiator').should.be.true
+            votes['user-voting-session-initiator'].should.eq('tansaku')
+            done()
+          })
+        })
+    })
 
   })
 
-  it('Record a vote to a restarted session', (done) => {
-    chai.request(app)
-      .post('/actions')
-      .send({
-        payload: JSON.stringify({
-          channel: { id: 1 },
-          actions: [{ value: 'Medium' }],
-          user: { name: 'User 2' },
-          original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
-          token: process.env.VALIDATION_TOKEN
-        })
-      })
-      .end((err, res) => {
-        res.should.have.status(200)
-        res.should.be.json
-        res.body.attachments[0].text.should.have.string('2 vote')
-        res.body.attachments[0].text.should.have.string('User 1')
-        res.body.attachments[0].text.should.have.string('User 2')
+  context('actions', (done) => {
 
-        done()
-      })
-  })
+    beforeEach((done) => {
 
-  it('Record the time of a vote', (done) => {
-    chai.request(app)
-      .post('/actions')
-      .send({
-        payload: JSON.stringify({
-          channel: { id: 1 },
-          actions: [{ value: 'Medium' }],
-          user: { name: 'User 2' },
-          original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
-          token: process.env.VALIDATION_TOKEN
-        })
-      })
-      .end((err, res) => {
-        db.get('1Feature 1', (err, reply) =>{
-          votes = JSON.parse(reply) || {}
-          votes.hasOwnProperty('timestamp-User 2').should.be.true
-          console.log(votes['timestamp-User 2'])
-          isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false
+      db.flushdb(() => {
+        let votes = {}
+        votes['User 1'] = 'Simple'
+        db.set("1Feature 1", JSON.stringify(votes), (err, value) => {
           done()
         })
-      })
-  })
+      });
+    })
 
+    it('Record a vote to a restarted session', (done) => {
+      chai.request(app)
+        .post('/actions')
+        .send({
+          payload: JSON.stringify({
+            channel: { id: 1 },
+            actions: [{ value: 'Medium' }],
+            user: { name: 'User 2' },
+            original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
+            token: process.env.VALIDATION_TOKEN
+          })
+        })
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.should.be.json
+          res.body.attachments[0].text.should.have.string('2 vote')
+          res.body.attachments[0].text.should.have.string('User 1')
+          res.body.attachments[0].text.should.have.string('User 2')
+
+          done()
+        })
+    })
+
+    it('Record the time of a vote', (done) => {
+      chai.request(app)
+        .post('/actions')
+        .send({
+          payload: JSON.stringify({
+            channel: { id: 1 },
+            actions: [{ value: 'Medium' }],
+            user: { name: 'User 2' },
+            original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
+            token: process.env.VALIDATION_TOKEN
+          })
+        })
+        .end((err, res) => {
+          db.get('1Feature 1', (err, reply) =>{
+            votes = JSON.parse(reply) || {}
+            votes.hasOwnProperty('timestamp-User 2').should.be.true
+            console.log(votes['timestamp-User 2'])
+            isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false
+            done()
+          })
+        })
+    })
+  })
 })
 
-// Zsuark - 20170317 - Is this pprint function ever used?
-const pprint = (json) => JSON.stringify(json, null, '\t')
+  // Zsuark - 20170317 - Is this pprint function ever used?
+  const pprint = (json) => JSON.stringify(json, null, '\t')
