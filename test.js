@@ -377,7 +377,6 @@ describe('Persistence', (done) => {
           db.get('1Feature 1', (err, reply) =>{
             votes = JSON.parse(reply) || {}
             votes.hasOwnProperty('timestamp-User 2').should.be.true
-            console.log(votes['timestamp-User 2'])
             isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false
             done()
           })
