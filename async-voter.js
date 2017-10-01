@@ -98,7 +98,9 @@ module.exports = (app, repository) => {
       console.log("here is what is in the key already when the action was started")
       console.log(votes)
       if (actions[0].value === 'reveal') {
-        res.send(formatResult(text, votes))
+        repository.set(channel_id+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
+          res.send(formatResult(text, votes))
+        })
       } else {
         // TODO: Count vote for different voting sessions
 

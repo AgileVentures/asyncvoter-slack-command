@@ -240,6 +240,49 @@ describe('Persistence', (done) => {
         })
     })
 
+    it('Records when and by whom a voting session was revealed', (done) => {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: 'Feature 1', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+        .end((err, res) => {
+          chai.request(app)
+            .post('/actions')
+            .send({
+              payload: JSON.stringify({
+                channel: { id: 1 },
+                actions: [{ value: 'Medium' }],
+                user: { name: 'tansaku' },
+                original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
+                token: process.env.VALIDATION_TOKEN
+              })
+            })
+            .end((err, res) => {
+              chai.request(app)
+                .post('/actions')
+                .send({
+                  payload: JSON.stringify({
+                    channel: { id: 1 },
+                    actions: [{ value: 'reveal' }],
+                    user: { name: 'tansaku' },
+                    original_message: { text: 'Feature 1' },
+                    token: process.env.VALIDATION_TOKEN
+                  })
+                })
+                .end((err, res) => {
+                  //we do enjoy callback hell
+                  db.get("1Feature 1-revealed", (err, response) => {
+                    result = JSON.parse(response) || {}
+                    result.hasOwnProperty('timestamp-vote-revealed').should.be.true
+                    isNaN(Date.parse(result['timestamp-vote-revealed'])).should.be.false
+                    result.hasOwnProperty('user-voting-session-revealor').should.be.true
+                    result['user-voting-session-revealor'].should.eq('tansaku')
+                    done()
+                  })
+                })
+              })
+          })
+    })
+
     it('Records a users vote after voting session has begun', (done) => {
       chai.request(app)
         .post('/commands')
