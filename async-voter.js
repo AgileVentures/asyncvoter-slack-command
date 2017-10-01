@@ -95,6 +95,8 @@ module.exports = (app, repository) => {
 
       const votes = JSON.parse(reply) || {}
 
+      console.log("here is what is in the key already when the action was started")
+      console.log(votes)
       if (actions[0].value === 'reveal') {
         res.send(formatResult(text, votes))
       } else {

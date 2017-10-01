@@ -235,9 +235,34 @@ describe('Persistence', (done) => {
             votes = JSON.parse(reply) || {}
             votes.hasOwnProperty('timestamp-voting-session-start').should.be.true
             isNaN(Date.parse(votes['timestamp-voting-session-start'])).should.be.false
-
             done()
           })
+        })
+    })
+
+    it('Records a users vote after voting session has begun', (done) => {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: 'Feature 1', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+        .end((err, res) => {
+          chai.request(app)
+            .post('/actions')
+            .send({
+              payload: JSON.stringify({
+                channel: { id: 1 },
+                actions: [{ value: 'Medium' }],
+                user: { name: 'tansaku' },
+                original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
+                token: process.env.VALIDATION_TOKEN
+              })
+            })
+            .end((err, res) => {
+              db.get('1Feature 1', (err, reply) => {
+                votes = JSON.parse(reply) || {}
+                votes['tansaku'].should.eq('Medium')
+                done()
+              })
+            })
         })
     })
 
