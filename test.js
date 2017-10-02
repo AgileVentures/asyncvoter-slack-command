@@ -231,7 +231,7 @@ describe('Persistence', (done) => {
         .post('/commands')
         .send({ text: 'Feature 1', channel_id: 1, token: process.env.VALIDATION_TOKEN })
         .end((err, res) => {
-          db.get('1Feature 1-initiation', (err, reply) =>{
+          db.get('1-Feature 1-initiation', (err, reply) =>{
             votes = JSON.parse(reply) || {}
             votes.hasOwnProperty('timestamp-voting-session-start').should.be.true
             isNaN(Date.parse(votes['timestamp-voting-session-start'])).should.be.false
@@ -270,7 +270,7 @@ describe('Persistence', (done) => {
                 })
                 .end((err, res) => {
                   //we do enjoy callback hell
-                  db.get("1Feature 1-revealed", (err, response) => {
+                  db.get("1-Feature 1-revealed", (err, response) => {
                     result = JSON.parse(response) || {}
                     result.hasOwnProperty('timestamp-vote-revealed').should.be.true
                     isNaN(Date.parse(result['timestamp-vote-revealed'])).should.be.false
@@ -300,7 +300,7 @@ describe('Persistence', (done) => {
               })
             })
             .end((err, res) => {
-              db.get('1Feature 1', (err, reply) => {
+              db.get('1-Feature 1', (err, reply) => {
                 votes = JSON.parse(reply) || {}
                 votes['tansaku'].should.eq('Medium')
                 done()
@@ -314,7 +314,7 @@ describe('Persistence', (done) => {
         .post('/commands')
         .send({ text: 'Feature 1', user_name: 'tansaku', channel_id: 1, token: process.env.VALIDATION_TOKEN })
         .end((err, res) => {
-          db.get('1Feature 1-initiation', (err, reply) =>{
+          db.get('1-Feature 1-initiation', (err, reply) =>{
             votes = JSON.parse(reply) || {}
             votes.hasOwnProperty('user-voting-session-initiator').should.be.true
             votes['user-voting-session-initiator'].should.eq('tansaku')
@@ -332,7 +332,7 @@ describe('Persistence', (done) => {
       db.flushdb(() => {
         let votes = {}
         votes['User 1'] = 'Simple'
-        db.set("1Feature 1", JSON.stringify(votes), (err, value) => {
+        db.set("1-Feature 1", JSON.stringify(votes), (err, value) => {
           done()
         })
       });
@@ -374,7 +374,7 @@ describe('Persistence', (done) => {
           })
         })
         .end((err, res) => {
-          db.get('1Feature 1', (err, reply) =>{
+          db.get('1-Feature 1', (err, reply) =>{
             votes = JSON.parse(reply) || {}
             votes.hasOwnProperty('timestamp-User 2').should.be.true
             isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false

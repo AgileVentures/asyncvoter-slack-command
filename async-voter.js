@@ -51,9 +51,9 @@ module.exports = (app, repository) => {
     const channel_id = req.body.channel_id
 
     // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id + text + "-initiation", (err, reply) => {
+    repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_name,
+      repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_name,
                                                        'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
         res.send(formatStart(text))
       })
@@ -81,12 +81,12 @@ module.exports = (app, repository) => {
 
     const ticket_description = extractTicketDescription(text)
 
-    repository.get(channel_id + ticket_description, (err, reply) => {
+    repository.get(channel_id + "-" + ticket_description, (err, reply) => {
 
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
-        repository.set(channel_id+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
+        repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
         })
       } else {
@@ -95,7 +95,7 @@ module.exports = (app, repository) => {
         votes[user] = actions[0].value
         votes["timestamp-"+user] = new Date().toISOString()
 
-        repository.set(channel_id + ticket_description, JSON.stringify(votes), (err, reply) => {
+        repository.set(channel_id + "-"+ticket_description, JSON.stringify(votes), (err, reply) => {
           res.send(formatRegister(text, votes))
         })
       }
