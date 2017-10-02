@@ -50,11 +50,6 @@ module.exports = (app, repository) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
 
-    console.log("hit command endpoint with text and channel_id and key")
-    console.log(text)
-    console.log(channel_id)
-    console.log(channel_id + text)
-
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id + text + "-initiation", (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
@@ -88,15 +83,8 @@ module.exports = (app, repository) => {
 
     repository.get(channel_id + ticket_description, (err, reply) => {
 
-      console.log("hit action endpoint with text and channel_id and key")
-      console.log(text)
-      console.log(channel_id)
-      console.log(channel_id + ticket_description)
-
       const votes = JSON.parse(reply) || {}
 
-      console.log("here is what is in the key already when the action was started")
-      console.log(votes)
       if (actions[0].value === 'reveal') {
         repository.set(channel_id+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
