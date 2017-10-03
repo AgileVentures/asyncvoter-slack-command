@@ -312,12 +312,12 @@ describe('Persistence', (done) => {
     it('Records who began voting session', (done) => {
       chai.request(app)
         .post('/commands')
-        .send({ text: 'Feature 1', user_name: 'tansaku', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+        .send({ text: 'Feature 1', user_id: "C8", user_name: 'tansaku', channel_id: 1, token: process.env.VALIDATION_TOKEN })
         .end((err, res) => {
           db.get('1-Feature 1-initiation', (err, reply) =>{
             votes = JSON.parse(reply) || {}
             votes.hasOwnProperty('user-voting-session-initiator').should.be.true
-            votes['user-voting-session-initiator'].should.eq('tansaku')
+            votes['user-voting-session-initiator'].should.eq('C8')
             done()
           })
         })

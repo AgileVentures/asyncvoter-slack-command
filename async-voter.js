@@ -53,7 +53,7 @@ module.exports = (app, repository) => {
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_name,
+      repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
                                                        'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
         res.send(formatStart(text))
       })
