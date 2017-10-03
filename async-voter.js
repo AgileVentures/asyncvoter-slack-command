@@ -73,6 +73,7 @@ module.exports = (app, repository) => {
     const actions = payload.actions
     const text = payload.original_message.text
     const user = payload.user.name
+    const user_id = payload.user.id
     const channel_id = payload.channel.id
 
     const extractTicketDescription = (text) => {
@@ -86,7 +87,7 @@ module.exports = (app, repository) => {
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
-        repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
+        repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user_id, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
         })
       } else {

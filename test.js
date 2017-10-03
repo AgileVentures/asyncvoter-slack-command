@@ -263,7 +263,7 @@ describe('Persistence', (done) => {
                   payload: JSON.stringify({
                     channel: { id: 1 },
                     actions: [{ value: 'reveal' }],
-                    user: { name: 'tansaku' },
+                    user: { id: 'C8', name: 'tansaku' },
                     original_message: { text: 'Feature 1' },
                     token: process.env.VALIDATION_TOKEN
                   })
@@ -275,7 +275,7 @@ describe('Persistence', (done) => {
                     result.hasOwnProperty('timestamp-vote-revealed').should.be.true
                     isNaN(Date.parse(result['timestamp-vote-revealed'])).should.be.false
                     result.hasOwnProperty('user-voting-session-revealor').should.be.true
-                    result['user-voting-session-revealor'].should.eq('tansaku')
+                    result['user-voting-session-revealor'].should.eq('C8')
                     done()
                   })
                 })
