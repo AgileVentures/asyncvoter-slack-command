@@ -94,10 +94,16 @@ module.exports = (app, repository) => {
         // TODO: Count vote for different voting sessions
 
         votes[user] = actions[0].value
-        votes["timestamp-"+user] = new Date().toISOString()
-
+        
         repository.set(channel_id + "-"+ticket_description, JSON.stringify(votes), (err, reply) => {
-          res.send(formatRegister(text, votes))
+          repository.get(channel_id + "-" + ticket_description + "-record-by-user-id", (err, reply) => {
+            const votes_by_id = JSON.parse(reply) || {}
+            votes_by_id[user_id] = actions[0].value
+            votes_by_id["timestamp-"+user_id] = new Date().toISOString()
+            repository.set(channel_id + "-" + ticket_description + "-record-by-user-id", JSON.stringify(votes_by_id), (err, reply) => {
+              res.send(formatRegister(text, votes))
+            })
+          })
         })
       }
     })

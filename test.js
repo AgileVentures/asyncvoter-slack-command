@@ -294,15 +294,15 @@ describe('Persistence', (done) => {
               payload: JSON.stringify({
                 channel: { id: 1 },
                 actions: [{ value: 'Medium' }],
-                user: { name: 'tansaku' },
+                user: { name: 'tansaku', id: 'C8' },
                 original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
                 token: process.env.VALIDATION_TOKEN
               })
             })
             .end((err, res) => {
-              db.get('1-Feature 1', (err, reply) => {
+              db.get('1-Feature 1-record-by-user-id', (err, reply) => {
                 votes = JSON.parse(reply) || {}
-                votes['tansaku'].should.eq('Medium')
+                votes['C8'].should.eq('Medium')
                 done()
               })
             })
@@ -368,16 +368,16 @@ describe('Persistence', (done) => {
           payload: JSON.stringify({
             channel: { id: 1 },
             actions: [{ value: 'Medium' }],
-            user: { name: 'User 2' },
+            user: { name: 'User 2', id: 'C8' },
             original_message: { text: `<!here> ASYNC VOTE on "${'Feature 1'}"` },
             token: process.env.VALIDATION_TOKEN
           })
         })
         .end((err, res) => {
-          db.get('1-Feature 1', (err, reply) =>{
+          db.get('1-Feature 1-record-by-user-id', (err, reply) =>{
             votes = JSON.parse(reply) || {}
-            votes.hasOwnProperty('timestamp-User 2').should.be.true
-            isNaN(Date.parse(votes['timestamp-User 2'])).should.be.false
+            votes.hasOwnProperty('timestamp-C8').should.be.true
+            isNaN(Date.parse(votes['timestamp-C8'])).should.be.false
             done()
           })
         })
