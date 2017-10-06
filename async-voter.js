@@ -51,9 +51,10 @@ module.exports = (app, repository) => {
     const channel_id = req.body.channel_id
 
     // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id, (err, reply) => {
+    repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id, JSON.stringify({}), (err, reply) => {
+      repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
+                                                       'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
         res.send(formatStart(text))
       })
     })
@@ -72,24 +73,44 @@ module.exports = (app, repository) => {
     const actions = payload.actions
     const text = payload.original_message.text
     const user = payload.user.name
+    const user_id = payload.user.id
     const channel_id = payload.channel.id
 
-    repository.get(channel_id, (err, reply) => {
+    const extractTicketDescription = (text) => {
+      return text.replace(/^<!here> ASYNC VOTE on \"/,'').replace(/"$/,'')
+    }
+
+    const ticket_description = extractTicketDescription(text)
+
+    repository.get(channel_id + "-" + ticket_description, (err, reply) => {
+
       const votes = JSON.parse(reply) || {}
 
       if (actions[0].value === 'reveal') {
-        res.send(formatResult(text, votes))
+        repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user_id, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
+          res.send(formatResult(text, votes))
+        })
       } else {
         // TODO: Count vote for different voting sessions
 
         votes[user] = actions[0].value
-
-        repository.set(channel_id, JSON.stringify(votes), (err, reply) => {
-          res.send(formatRegister(text, votes))
+        
+        repository.set(channel_id + "-"+ticket_description, JSON.stringify(votes), (err, reply) => {
+          repository.get(channel_id + "-" + ticket_description + "-record-by-user-id", (err, reply) => {
+            const votes_by_id = JSON.parse(reply) || {}
+            votes_by_id[user_id] = actions[0].value
+            votes_by_id["timestamp-"+user_id] = new Date().toISOString()
+            repository.set(channel_id + "-" + ticket_description + "-record-by-user-id", JSON.stringify(votes_by_id), (err, reply) => {
+              res.send(formatRegister(text, votes))
+            })
+          })
         })
       }
     })
   })
+
+
+  // localsupport_text: { tansaku: '1', mtc2013: 'medium'}
 
   const ACTIONS = [{
           'name': 'Simple',
@@ -130,9 +151,17 @@ module.exports = (app, repository) => {
     return msg
   }
 
+  const isVote = function(key){
+    return key.match(/(timestamp-)|(user-voting-session-initiator)/) == null
+  }
+
   const formatResult = (text, votes) => {
 
-    const result = Object.keys(votes).map((user) => {
+
+    const actual_votes = Object.keys(votes)
+                        .filter( key => isVote(key) )
+                        .reduce( (res, key) => (res[key] = votes[key], res), {} );
+    const result = Object.keys(actual_votes).map((user) => {
       return `\n@${user} ${votes[user]}`
     })
 
@@ -147,7 +176,10 @@ module.exports = (app, repository) => {
   const formatRegister = (text, votes) => {
 
     // A set of all users who have voted
-    const users = Object.keys(votes).map((user) => {
+    const actual_votes = Object.keys(votes)
+                        .filter( key => isVote(key) )
+                        .reduce( (res, key) => (res[key] = votes[key], res), {} );
+    const users = Object.keys(actual_votes).map((user) => {
       return "@" + user
     })
 
