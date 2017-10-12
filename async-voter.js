@@ -50,6 +50,19 @@ module.exports = (app, repository) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
 
+    if(text === '--help') {
+      res.send({
+         "response_type": "ephemeral",
+         "text": "How to use /voter",
+         "attachments":[
+             {
+                "text":"**HELP TEXT GOES HERE**\nYou’ve already learned how to get help with `/voter --help`."
+             }
+         ]
+      }
+        )
+    } else {
+
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
@@ -58,6 +71,7 @@ module.exports = (app, repository) => {
         res.send(formatStart(text))
       })
     })
+  };
   })
 
   app.post('/actions', (req, res) => {
@@ -94,7 +108,7 @@ module.exports = (app, repository) => {
         // TODO: Count vote for different voting sessions
 
         votes[user] = actions[0].value
-        
+
         repository.set(channel_id + "-"+ticket_description, JSON.stringify(votes), (err, reply) => {
           repository.get(channel_id + "-" + ticket_description + "-record-by-user-id", (err, reply) => {
             const votes_by_id = JSON.parse(reply) || {}
