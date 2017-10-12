@@ -382,6 +382,25 @@ describe('Persistence', (done) => {
           })
         })
     })
+
+    it('View command help', (done) => {
+      chai.request(app)
+        .post('/commands')
+        .send({ text: '--help', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.should.be.json
+          res.should.have.property('text')
+
+          const responseText = res.body.attachments[0].text
+          responseText.should.be.a('string')
+          responseText.should.equals('**HELP TEXT GOES HERE**\nYou’ve already learned how to get help with `/voter --help`.')
+
+          done()
+        })
+    })
+
+
   })
 })
 
