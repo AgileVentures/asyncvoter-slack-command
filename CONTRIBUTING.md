@@ -34,20 +34,20 @@ To get involved please follow these steps:
 
 
 ## git and GitHub
-Our **default working branch is `develop`**.  We do work by creating branches off `develop` for new features and bugfixes.
+Our **default working branch is `staging`**.  We do work by creating branches off `staging` for new features and bugfixes.
 
 Any *feature* should include appropriate Cucumber acceptance tests and RSpec unit tests.  We try to avoid view and controller specs, and focus purely on unit tests at the model and service level where possible.
 
 A *bugfix* may include an acceptance test depending on where the bug occurred, but fixing a bug should start with the creation of a test that replicates the bug, so that any bugfix submission will include an appropriate test as well as the fix itself.
 
-Each developer will usually work with a [fork](https://help.github.com/articles/fork-a-repo/) of the [main repository on Agile Ventures](https://github.com/AgileVentures/async-voter-slack-command). Before starting work on a new feature or bugfix, please ensure you have [synced your fork to upstream/develop](https://help.github.com/articles/syncing-a-fork/):
+Each developer will usually work with a [fork](https://help.github.com/articles/fork-a-repo/) of the [main repository on Agile Ventures](https://github.com/AgileVentures/async-voter-slack-command). Before starting work on a new feature or bugfix, please ensure you have [synced your fork to upstream/staging](https://help.github.com/articles/syncing-a-fork/):
 
 ```
 git pull upstream staging
 ```
 
 Note that you should be re-syncing daily (even hourly at very active times) on your
-feature/bugfix branch to ensure that you are always building on top of very latest develop code.
+feature/bugfix branch to ensure that you are always building on top of very latest staging code.
 
 ### Pull Requests: naming, syncing, size
 Here is [how to create and submit a pull requests](https://github.com/AgileVentures/WebsiteOne/blob/develop/docs/how_to_submit_a_pull_request_on_github.md).
