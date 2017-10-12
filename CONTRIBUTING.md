@@ -43,7 +43,7 @@ A *bugfix* may include an acceptance test depending on where the bug occurred, b
 Each developer will usually work with a [fork](https://help.github.com/articles/fork-a-repo/) of the [main repository on Agile Ventures](https://github.com/AgileVentures/async-voter-slack-command). Before starting work on a new feature or bugfix, please ensure you have [synced your fork to upstream/develop](https://help.github.com/articles/syncing-a-fork/):
 
 ```
-git pull upstream develop
+git pull upstream staging
 ```
 
 Note that you should be re-syncing daily (even hourly at very active times) on your
@@ -66,7 +66,7 @@ Whatever you are working on, or however far you get please do open a "Work in Pr
 Before you make a pull request it is a great idea to sync again to the upstream develop branch to reduce the chance that there will be any merge conflicts arising from other PRs that have been merged to develop since you started work:
 
 ```
-git pull upstream develop
+git pull upstream staging
 ```
 
 In your pull request description please include a sensible description of your code and a tag `fixes #<issue-id>` e.g. :
