@@ -51,18 +51,8 @@ module.exports = (app, repository) => {
     const channel_id = req.body.channel_id
 
     if(text === '--help') {
-      res.send({
-         "response_type": "ephemeral",
-         "text": "How to use /voter",
-         "attachments":[
-             {
-                "text":"**HELP TEXT GOES HERE**\nYou’ve already learned how to get help with `/voter --help`."
-             }
-         ]
-      }
-        )
+      res.send(HELPTEXT)
     } else {
-
     // TODO: Close previous session. One session per channel is allowed.
     repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
       // TODO: Save unique voting session. Team + Channel
@@ -125,6 +115,16 @@ module.exports = (app, repository) => {
 
 
   // localsupport_text: { tansaku: '1', mtc2013: 'medium'}
+
+  const HELPTEXT = {
+     "response_type": "ephemeral",
+     "text": "How to use /voter",
+     "attachments":[
+         {
+            "text":"**HELP TEXT GOES HERE**\nYou’ve already learned how to get help with `/voter --help`."
+         }
+     ]
+  }
 
   const ACTIONS = [{
           'name': 'Simple',
