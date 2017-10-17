@@ -394,7 +394,10 @@ describe('Persistence', (done) => {
 
           const responseText = res.body.attachments[0].text
           responseText.should.be.a('string')
-          responseText.should.equals('**HELP TEXT GOES HERE**\nYou’ve already learned how to get help with `/voter --help`.')
+          responseText.should.contain("AsyncVoter allows you and your slack team to run 'planning poker' style")
+          responseText.should.contain("/voter can take any text argument")
+          responseText.should.contain("Simple(1),  Medium(2) or Hard(3)")
+          responseText.should.contain("Voting is no substitute for discussion")
 
           done()
         })

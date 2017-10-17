@@ -121,7 +121,20 @@ module.exports = (app, repository) => {
      "text": "How to use /voter",
      "attachments":[
          {
-            "text":"**HELP TEXT GOES HERE**\nYou’ve already learned how to get help with `/voter --help`."
+            "text":"AsyncVoter allows you and your slack team to run 'planning poker' style votes on stories or " +
+                   "issues relating to your project. The idea is that everyone can vote in secret and then all votes " +
+                   "are revealed at once to expose differences in assumptions and facilitate discussion.\n\n" +
+                   "/voter can take any text argument - we recommend that you describe the title of the issue you " +
+                   "are planning to vote on, and then a URL to a permanent linked ticket where the results of the " +
+                   "vote can be stored.\n\n" +
+                   "e.g. /voter Search Local Events https://www.pivotaltracker.com/story/show/45392619\n\n" +
+                   "Any number of votes can be started in a channel and run independently. Anyone in the channel can " +
+                   "register their vote through the interface that will pop up when a vote is started, voting Simple(1),  " +
+                   "Medium(2) or Hard(3) based on how difficult they think it will be to complete work on the issue. " +
+                   "Undecided folks can vote 'No Opinion' and when everyone is ready, anyone can press reveal to reveal " +
+                   "who voted want.\n\n" +
+                   "Voting is no substitute for discussion. Really it's all about communicating with your team and " +
+                   "agreeing to compromise when it's time to move on."
          }
      ]
   }
