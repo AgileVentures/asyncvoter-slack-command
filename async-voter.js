@@ -50,7 +50,7 @@ module.exports = (app, repository) => {
     const text = req.body.text
     const channel_id = req.body.channel_id
 
-    if(text === '--help') {
+    if(text === '--help' || text === 'help') {
       res.send(HELPTEXT)
     } else {
     // TODO: Close previous session. One session per channel is allowed.
