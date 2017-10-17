@@ -132,7 +132,7 @@ module.exports = (app, repository) => {
                    "register their vote through the interface that will pop up when a vote is started, voting Simple(1),  " +
                    "Medium(2) or Hard(3) based on how difficult they think it will be to complete work on the issue. " +
                    "Undecided folks can vote 'No Opinion' and when everyone is ready, anyone can press reveal to reveal " +
-                   "who voted want.\n\n" +
+                   "who voted what.\n\n" +
                    "Voting is no substitute for discussion. Really it's all about communicating with your team and " +
                    "agreeing to compromise when it's time to move on."
          }
