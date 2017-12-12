@@ -25,7 +25,7 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 - [Redis](https://redis.io/) v3.2.8 or later
 - [Node](https://nodejs.org) v7.4.0 or later
 
-## Development
+## Development 
 
 1. Install dependencies `npm install`
 
@@ -41,16 +41,16 @@ You **need** to set up your own Slack **team** and Slack **app** to continue!
 
 ## Setting Up your own Slack team and app
 
-- [Create a Slack Team](https://slack.com/create)
-- [Create a Slack app](https://api.slack.com/apps?new_app=1)
-- Install `ngrok` and run `ngrok http 4390` to expose your local server
-- Enable `Slash Commands` in your Slack app with `https://<YOUR-NGROK-URL>/commands`
-- Enable `Interactive Messages` in your Slack app with `https://<YOUR-NGROK-URL>/actions`
-- Rename `.env.example` to `.env` and set your Slack app tokens there
-- Go to <http://localhost:4390> and follow the instructions.
+  - [Create a Slack Team](https://slack.com/create)
+  - [Create a Slack app](https://api.slack.com/apps?new_app=1)
+  - Install `ngrok` and run `ngrok http 4390` to expose your local server
+  - Enable `Slash Commands` in your Slack app with `https://<YOUR-NGROK-URL>/commands`
+  - Enable `Interactive Messages` in your Slack app with `https://<YOUR-NGROK-URL>/actions`
+  - Rename `.env.example` to `.env` and set your Slack app tokens there
+  - Go to <http://localhost:4390> and follow the instructions.
 
 ## References
 
-- [Getting started with Slack apps](https://api.slack.com/slack-apps)
-- [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
-- [One of Sam's blogs on the background of AsyncVoter](https://medium.com/agileventures/automating-what-to-do-next-7295c62007d9)
+  - [Getting started with Slack apps](https://api.slack.com/slack-apps)
+  - [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
+  - [One of Sam's blogs on the background of AsyncVoter](https://medium.com/agileventures/automating-what-to-do-next-7295c62007d9)
