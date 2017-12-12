@@ -39,7 +39,7 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 You **need** to set up your own Slack **team** and Slack **app** to continue!
 
-## Setting Up your own Slack team and app
+### Set Up Slack Team And App
 
   - [Create a Slack Team](https://slack.com/create)
   - [Create a Slack app](https://api.slack.com/apps?new_app=1)
