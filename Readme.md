@@ -27,27 +27,37 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 ## Development 
 
-1. Install dependencies `npm install`
+* Install dependencies:
 
-2. copy `.env.example` to `.env`
+  ```
+  $ npm install
+  ```
 
-3. ensure [redis](https://redis.io/topics/quickstart) is running
+* copy `.env.example` to `.env`
 
-4. Run tests `npm test`
+* ensure [redis](https://redis.io/topics/quickstart) is running
 
-5. Run the server `npm run dev`
+* Run tests 
 
-You **need** to set up your own Slack **team** and Slack **app** to continue!
+  ```
+  npm test
+  ```
 
-### Set Up Slack Team And App
+* Run the server 
 
-  - [Create a Slack Team](https://slack.com/create)
-  - [Create a Slack app](https://api.slack.com/apps?new_app=1)
-  - Install `ngrok` and run `ngrok http 4390` to expose your local server
-  - Enable `Slash Commands` in your Slack app with `https://<YOUR-NGROK-URL>/commands`
-  - Enable `Interactive Messages` in your Slack app with `https://<YOUR-NGROK-URL>/actions`
-  - Rename `.env.example` to `.env` and set your Slack app tokens there
-  - Go to <http://localhost:4390> and follow the instructions.
+  ```
+  npm run dev
+  ```
+
+* You **need** to set up your own Slack **team** and Slack **app** to continue!
+
+    - [Create a Slack Team](https://slack.com/create)
+    - [Create a Slack app](https://api.slack.com/apps?new_app=1)
+    - Install `ngrok` and run `ngrok http 4390` to expose your local server
+    - Enable `Slash Commands` in your Slack app with `https://<YOUR-NGROK-URL>/commands`
+    - Enable `Interactive Messages` in your Slack app with `https://<YOUR-NGROK-URL>/actions`
+    - Rename `.env.example` to `.env` and set your Slack app tokens there
+    - Go to <http://localhost:4390> and follow the instructions.
 
 ## References
 
