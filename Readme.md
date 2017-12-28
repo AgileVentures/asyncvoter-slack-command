@@ -1,10 +1,10 @@
-Slack app for Voting on Stories and Tickets remotely and asynchronously.
+# Slack app for Voting on Stories and Tickets remotely (and potentially asynchronously)
 
 AsyncVoter allows an entire Slack team to vote on an issue. AsyncVoter keeps track of the votes and keeps them secret until you're ready to reveal the results. This means the your team does not have to be on Slack at the same time. They can vote asynchronously.
 
 You can vote on any thing: you just provide some text to display. (You can include a line, for example, to a project task.)
 
-## Usage
+## Usage (to install in a new Slack instance)
 
 1. Install this app to your Slack team visiting https://production.asyncvoter.agileventures.org and pressing on the `Add to Slack` button.
 2. Run a voting session on an issue launching the new `/voter issue` command in any channel.
@@ -25,7 +25,7 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 - [Redis](https://redis.io/) v3.2.8 or later
 - [Node](https://nodejs.org) v7.4.0 or later
 
-## Development 
+## Development (install locally and connect to test Slack instance)
 
 * Install dependencies:
 
