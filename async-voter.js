@@ -10,7 +10,80 @@ function verifyAuthentic(msg, token) {
   return scmp(msg.token, token);
 }
 
-module.exports = (app, repository) => {
+module.exports = (app, repository, avApiClient) => {
+
+  function addStoryToMongoDB(text, channel_id, user_id) {
+
+    var newStory = {
+      name: text,
+      source: channel_id,
+      userId: user_id
+    };
+
+    var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
+
+    avApiClient.createStory( newStory, function (err, data, response) {
+      if (err) {
+        repository.del( mongoUidKey, (delerr, reply) => {
+          if (delerr) {
+            // handle error?
+          }
+        });
+      }
+      else {
+        repository.set(mongoUidKey, data._id, (err, reply) => {
+          if (err) {
+            // handle error?
+          }
+        });
+      }
+    })
+  }
+
+  function addVoteToMongoDB(text, channel_id, user_id, voteString) {
+
+    var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
+
+    repository.get( mongoUidKey, (err, storyId) => {
+
+      if (err || (!storyId)) {
+        // handle error
+      }
+      else {
+        var fields = {
+          user_id: user_id,
+          size: voteString
+        };
+
+        avApiClient.createVote(storyId, fields, (err, data, response) => {
+          if (err) {
+            // handle error
+          }
+        });
+      }
+    });
+  }
+
+  function sendRevealToMongoDB(text, channel_id) {
+    var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
+
+    repository.get( mongoUidKey, (err, storyId) => {
+      if (err) {
+      // handle error
+      }
+      else {
+        var fields = {
+          // user_id: user_id, //NOTE: we should store id of user who revealed, and timestamp
+          size: '4'
+        };
+        avApiClient.updateStory(storyId, fields, (err, data, response) => {
+          if (err) {
+            // handle error
+          }
+        });
+      }
+    });
+  }
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
@@ -52,17 +125,20 @@ module.exports = (app, repository) => {
 
     if(text === '--help' || text === 'help') {
       res.send(HELPTEXT)
-    } else {
-    // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
-      // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
-                                                       'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
-        res.send(formatStart(text))
+    }
+    else {
+      // TODO: Close previous session. One session per channel is allowed.
+      repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
+        // TODO: Save unique voting session. Team + Channel
+        repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
+                                                         'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
+          res.send(formatStart(text))
+
+          addStoryToMongoDB(text, channel_id, req.body.user_id)
+        })
       })
-    })
-  };
-  })
+    }
+  }) // app.post('/commands'
 
   app.post('/actions', (req, res) => {
 
@@ -93,6 +169,8 @@ module.exports = (app, repository) => {
       if (actions[0].value === 'reveal') {
         repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user_id, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
+
+          sendRevealToMongoDB(text, channel_id)
         })
       } else {
         // TODO: Count vote for different voting sessions
@@ -106,6 +184,8 @@ module.exports = (app, repository) => {
             votes_by_id["timestamp-"+user_id] = new Date().toISOString()
             repository.set(channel_id + "-" + ticket_description + "-record-by-user-id", JSON.stringify(votes_by_id), (err, reply) => {
               res.send(formatRegister(text, votes))
+
+              addVoteToMongoDB(text, channel_id, user_id, actions[0].value)
             })
           })
         })
