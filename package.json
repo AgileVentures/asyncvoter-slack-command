@@ -17,7 +17,7 @@
   "author": "AgileVentures",
   "license": "MIT",
   "dependencies": {
-    "asyncvoter-api-client": "github:AgileVentures/asyncvoter-api-client#develop",
+    "asyncvoter-api-client": "github:AgileVentures/asyncvoter-api-client#master",
     "body-parser": "^1.16.0",
     "dotenv": "^4.0.0",
     "ejs": "^2.5.5",
