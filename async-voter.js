@@ -25,6 +25,7 @@ module.exports = (app, repository, avApiClient) => {
     avApiClient.createStory( newStory, function (err, data, response) {
       console.log('avApiClient.createStory')
       if (err) {
+        console.log(err)
         repository.del( mongoUidKey, (delerr, reply) => {
           if (delerr) {
             // handle error?
@@ -33,6 +34,7 @@ module.exports = (app, repository, avApiClient) => {
         });
       }
       else {
+        console.log('key: ' + mongoUidKey)
         repository.set(mongoUidKey, data._id, (err, reply) => {
           if (err) {
             // handle error?
