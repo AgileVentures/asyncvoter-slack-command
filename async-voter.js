@@ -48,6 +48,7 @@ module.exports = (app, repository, avApiClient) => {
 
       if (err || (!storyId)) {
         // handle error
+        console.log(err)
       }
       else {
         var fields = {
@@ -58,6 +59,7 @@ module.exports = (app, repository, avApiClient) => {
         avApiClient.createVote(storyId, fields, (err, data, response) => {
           if (err) {
             // handle error
+            console.log(err)
           }
         });
       }
@@ -70,6 +72,7 @@ module.exports = (app, repository, avApiClient) => {
     repository.get( mongoUidKey, (err, storyId) => {
       if (err) {
       // handle error
+      console.log(err)
       }
       else {
         var fields = {
@@ -79,6 +82,7 @@ module.exports = (app, repository, avApiClient) => {
         avApiClient.updateStory(storyId, fields, (err, data, response) => {
           if (err) {
             // handle error
+            console.log(err)
           }
         });
       }
