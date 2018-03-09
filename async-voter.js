@@ -23,10 +23,12 @@ module.exports = (app, repository, avApiClient) => {
     var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
 
     avApiClient.createStory( newStory, function (err, data, response) {
+      console.log('avApiClient.createStory')
       if (err) {
         repository.del( mongoUidKey, (delerr, reply) => {
           if (delerr) {
             // handle error?
+            console.log(delerr)
           }
         });
       }
@@ -34,6 +36,7 @@ module.exports = (app, repository, avApiClient) => {
         repository.set(mongoUidKey, data._id, (err, reply) => {
           if (err) {
             // handle error?
+            console.log(err)
           }
         });
       }
@@ -45,7 +48,7 @@ module.exports = (app, repository, avApiClient) => {
     var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
 
     repository.get( mongoUidKey, (err, storyId) => {
-
+      
       if (err || (!storyId)) {
         // handle error
         console.log(err)
@@ -137,7 +140,7 @@ module.exports = (app, repository, avApiClient) => {
         repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
                                                          'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
           res.send(formatStart(text))
-
+          console.log('addStoryToMongoDB')
           addStoryToMongoDB(text, channel_id, req.body.user_id)
         })
       })
