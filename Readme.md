@@ -4,21 +4,24 @@ AsyncVoter allows an entire Slack team to vote on an issue. AsyncVoter keeps tra
 
 You can vote on any thing: you just provide some text to display. (You can include a line, for example, to a project task.)
 
-## Usage (to install in a new Slack instance)
+## Usage (if already installed in your Slack instance)
 
-1. Install this app to your Slack team visiting https://production.asyncvoter.agileventures.org and pressing on the `Add to Slack` button.
+1. Type `/voter --help` to get help instructions
 2. Run a voting session on an issue launching the new `/voter issue` command in any channel.
 3. Submit your vote pressing on any of the three difficulty buttons (Easy, Medium or Hard).
 4. Finish and reveal the result of the voting session by pressing on the `Reveal` button. (We recommend to wait until you will receive 3 or more votes)
 
+## Install in a new Slack instance
+
+Install app to your Slack team visiting https://production.asyncvoter.agileventures.org and pressing on the `Add to Slack` button.
+
 ## Known Issues
 
 - Votes cannot be reset. But users can vote multiple times on the same issue.
-- It supports parallel voting sessions in different channels only.
 
 ## Questions/feedback?
 
-Create an issue in this repo, or contact us at [#async_voter](https://agileventures.slack.com/messages/async_voter)
+Create an issue in this repo, or contact us at [#async_voter](https://agileventures.slack.com/messages/async_voter) (free slack account if you sign up at https://www.agileventures.org)
 
 ## Requirements
 
