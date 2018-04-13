@@ -8,7 +8,7 @@ const AsyncVoterApiClient = require('asyncvoter-api-client')
 
 const avApiClient = new AsyncVoterApiClient();
 avApiClient.setBaseUrl(
-	process.env.ASYNCVOTER_API_PATH || 'http://api-production.asyncvoter.agileventures.org/'
+	process.env.ASYNCVOTER_API_PATH || 'http://api-test.asyncvoter.agileventures.org'
 );
 
 const redis = require('redis')

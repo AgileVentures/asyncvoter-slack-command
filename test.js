@@ -7,7 +7,8 @@ const db = require('./index').db
 const chai = require('chai')
 const should = chai.should()
 
-const nock = require('nock')
+// const nock = require('nock')
+// nock.enableNetConnect();
 
 chai.use(require('chai-http'))
 chai.use(require('chai-string'))
@@ -34,10 +35,10 @@ describe('Install app', () => {
   it('Authorize the app', (done) => {
 
     // Given: External requests are mocked
-    nock('https://slack.com')
-      .get('/api/oauth.access')
-      .query({ code, client_id, client_secret })
-      .reply(200)
+    // nock('https://slack.com')
+    //   .get('/api/oauth.access')
+    //   .query({ code, client_id, client_secret })
+    //   .reply(200)
 
     chai.request(app)
       .get('/oauth')
@@ -56,10 +57,12 @@ describe('Run a voting session', () => {
     db.flushdb(done);
   })
 
-  it('Start a voting session', (done) => {
-    chai.request(app)
+  it.only('Start a voting session', (done) => {
+    var requester = chai.request(app).keepOpen()
+
+    requester
       .post('/commands')
-      .send({ text: 'Feature 1', channel_id: 1, token: process.env.VALIDATION_TOKEN })
+      .send({ text: 'Feature 1 (Michael)', user_id: 'sam', channel_id: 1, token: process.env.VALIDATION_TOKEN })
       .end((err, res) => {
         res.should.have.status(200)
         res.should.be.json
@@ -78,7 +81,8 @@ describe('Run a voting session', () => {
         actions[1].text.should.equals('Medium (2)')
         actions[2].text.should.equals('Hard (3)')
         actions[3].value.should.equals('No-opinion')
-        done()
+        requester.close()
+        done(err)
       })
   })
 
