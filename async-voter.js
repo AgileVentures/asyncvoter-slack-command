@@ -12,7 +12,7 @@ function verifyAuthentic(msg, token) {
 
 module.exports = (app, repository, avApiClient) => {
 
-  function addStoryToMongoDB(text, channel_id, user_id) {
+  function persistStory(text, channel_id, user_id) {
 
     var newStory = {
       name: text,
@@ -20,13 +20,13 @@ module.exports = (app, repository, avApiClient) => {
       userId: user_id
     };
 
-    var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
+    var persistenceUidKey = "persistence-id-"+ channel_id + "-" + text;
 
     avApiClient.createStory( newStory, function (err, data, response) {
       console.log('avApiClient.createStory')
       if (err) {
         console.log(err)
-        repository.del( mongoUidKey, (delerr, reply) => {
+        repository.del( persistenceUidKey, (delerr, reply) => {
           if (delerr) {
             // handle error?
             console.log(delerr)
@@ -34,8 +34,8 @@ module.exports = (app, repository, avApiClient) => {
         });
       }
       else {
-        console.log('key: ' + mongoUidKey)
-        repository.set(mongoUidKey, data._id, (err, reply) => {
+        console.log('key: ' + persistenceUidKey)
+        repository.set(persistenceUidKey, data._id, (err, reply) => {
           if (err) {
             // handle error?
             console.log(err)
@@ -45,11 +45,11 @@ module.exports = (app, repository, avApiClient) => {
     })
   }
 
-  function addVoteToMongoDB(text, channel_id, user_id, voteString) {
+  function persistVote(text, channel_id, user_id, voteString) {
 
-    var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
+    var persistenceUidKey = "persistence-id-"+ channel_id + "-" + text;
 
-    repository.get( mongoUidKey, (err, storyId) => {
+    repository.get( persistenceUidKey, (err, storyId) => {
       
       if (err || (!storyId)) {
         // handle error
@@ -71,10 +71,10 @@ module.exports = (app, repository, avApiClient) => {
     });
   }
 
-  function sendRevealToMongoDB(text, channel_id) {
-    var mongoUidKey = "mongouid-"+ channel_id + "-" + text;
+  function persistReveal(text, channel_id) {
+    var persistenceUidKey = "persistence-id-"+ channel_id + "-" + text;
 
-    repository.get( mongoUidKey, (err, storyId) => {
+    repository.get( persistenceUidKey, (err, storyId) => {
       if (err) {
       // handle error
       console.log(err)
@@ -142,8 +142,8 @@ module.exports = (app, repository, avApiClient) => {
         repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
                                                          'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
           res.send(formatStart(text))
-          console.log('addStoryToMongoDB')
-          addStoryToMongoDB(text, channel_id, req.body.user_id)
+          console.log('persistStory')
+          persistStory(text, channel_id, req.body.user_id)
         })
       })
     }
@@ -179,7 +179,7 @@ module.exports = (app, repository, avApiClient) => {
         repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user_id, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
 
-          sendRevealToMongoDB(text, channel_id)
+          persistReveal(text, channel_id)
         })
       } else {
         // TODO: Count vote for different voting sessions
@@ -194,7 +194,7 @@ module.exports = (app, repository, avApiClient) => {
             repository.set(channel_id + "-" + ticket_description + "-record-by-user-id", JSON.stringify(votes_by_id), (err, reply) => {
               res.send(formatRegister(text, votes))
 
-              addVoteToMongoDB(text, channel_id, user_id, actions[0].value)
+              persistVote(text, channel_id, user_id, actions[0].value)
             })
           })
         })
