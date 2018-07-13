@@ -57,7 +57,7 @@ describe('Run a voting session', () => {
     db.flushdb(done);
   })
 
-  it.only('Start a voting session', (done) => {
+  it('Start a voting session', (done) => {
     var requester = chai.request(app).keepOpen()
 
     requester
