@@ -84,7 +84,7 @@ module.exports = (app, repository, avApiClient) => {
           // user_id: user_id, //NOTE: we should store id of user who revealed, and timestamp
           size: '4'
         };
-        avApiClient.updateStory(storyId, fields, (err, data, response) => {
+        avApiClient.updateStorySize(storyId, fields, (err, data, response) => {
           if (err) {
             // handle error
             console.log(err)
