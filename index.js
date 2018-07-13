@@ -3,6 +3,14 @@ require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 
+
+const AsyncVoterApiClient = require('asyncvoter-api-client')
+
+const avApiClient = new AsyncVoterApiClient();
+avApiClient.setBaseUrl(
+	process.env.ASYNCVOTER_API_PATH || 'http://api-test.asyncvoter.agileventures.org'
+);
+
 const redis = require('redis')
 
 const db = redis.createClient(process.env.REDIS_URL || 'redis://localhost:6379')
@@ -20,7 +28,7 @@ app.use(express.static('public'))
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 
-require('./async-voter')(app, db)
+require('./async-voter')(app, db, avApiClient)
 
 const server = app.listen(PORT, () => {
   console.log('Listening on port ' + PORT)

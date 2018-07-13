@@ -10,7 +10,9 @@ function verifyAuthentic(msg, token) {
   return scmp(msg.token, token);
 }
 
-module.exports = (app, repository) => {
+const { persistStory, persistVote, persistReveal } = require('./persist.js');
+
+module.exports = (app, repository, avApiClient) => {
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
@@ -52,17 +54,20 @@ module.exports = (app, repository) => {
 
     if(text === '--help' || text === 'help') {
       res.send(HELPTEXT)
-    } else {
-    // TODO: Close previous session. One session per channel is allowed.
-    repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
-      // TODO: Save unique voting session. Team + Channel
-      repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
-                                                       'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
-        res.send(formatStart(text))
+    }
+    else {
+      // TODO: Close previous session. One session per channel is allowed.
+      repository.del(channel_id + "-" + text + "-initiation", (err, reply) => {
+        // TODO: Save unique voting session. Team + Channel
+        repository.set(channel_id + "-" + text + "-initiation", JSON.stringify({'user-voting-session-initiator':req.body.user_id,
+                                                         'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
+          res.send(formatStart(text))
+          console.log('persistStory')
+          persistStory(text, channel_id, req.body.user_id, avApiClient, repository)
+        })
       })
-    })
-  };
-  })
+    }
+  }) // app.post('/commands'
 
   app.post('/actions', (req, res) => {
 
@@ -93,6 +98,8 @@ module.exports = (app, repository) => {
       if (actions[0].value === 'reveal') {
         repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user_id, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
+
+          persistReveal(text, channel_id, avApiClient, repository)
         })
       } else {
         // TODO: Count vote for different voting sessions
@@ -106,6 +113,8 @@ module.exports = (app, repository) => {
             votes_by_id["timestamp-"+user_id] = new Date().toISOString()
             repository.set(channel_id + "-" + ticket_description + "-record-by-user-id", JSON.stringify(votes_by_id), (err, reply) => {
               res.send(formatRegister(text, votes))
+
+              persistVote(text, channel_id, user_id, actions[0].value, avApiClient, repository)
             })
           })
         })
