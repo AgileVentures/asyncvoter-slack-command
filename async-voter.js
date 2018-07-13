@@ -10,89 +10,9 @@ function verifyAuthentic(msg, token) {
   return scmp(msg.token, token);
 }
 
+const { persistStory, persistVote, persistReveal } = require('./persist.js');
+
 module.exports = (app, repository, avApiClient) => {
-
-  function persistStory(text, channel_id, user_id) {
-
-    var newStory = {
-      name: text,
-      source: channel_id,
-      userId: user_id
-    };
-
-    var persistenceUidKey = "persistence-id-"+ channel_id + "-" + text;
-
-    avApiClient.createStory( newStory, function (err, data, response) {
-      console.log('avApiClient.createStory')
-      if (err) {
-        console.log(err)
-        repository.del( persistenceUidKey, (delerr, reply) => {
-          if (delerr) {
-            // handle error?
-            console.log(delerr)
-          }
-        });
-      }
-      else {
-        console.log('key: ' + persistenceUidKey)
-        repository.set(persistenceUidKey, data._id, (err, reply) => {
-          if (err) {
-            // handle error?
-            console.log(err)
-          }
-        });
-      }
-    })
-  }
-
-  function persistVote(text, channel_id, user_id, voteString) {
-
-    var persistenceUidKey = "persistence-id-"+ channel_id + "-" + text;
-
-    repository.get( persistenceUidKey, (err, storyId) => {
-      
-      if (err || (!storyId)) {
-        // handle error
-        console.log(err)
-      }
-      else {
-        var fields = {
-          user_id: user_id,
-          size: voteString
-        };
-
-        avApiClient.createVote(storyId, fields, (err, data, response) => {
-          if (err) {
-            // handle error
-            console.log(err)
-          }
-        });
-      }
-    });
-  }
-
-  function persistReveal(text, channel_id) {
-    var persistenceUidKey = "persistence-id-"+ channel_id + "-" + text;
-
-    repository.get( persistenceUidKey, (err, storyId) => {
-      if (err) {
-      // handle error
-      console.log(err)
-      }
-      else {
-        var fields = {
-          // user_id: user_id, //NOTE: we should store id of user who revealed, and timestamp
-          size: '4'
-        };
-        avApiClient.updateStorySize(storyId, fields, (err, data, response) => {
-          if (err) {
-            // handle error
-            console.log(err)
-          }
-        });
-      }
-    });
-  }
 
   app.get('/', (req, res) => {
     res.render('index', { client_id: clientId })
@@ -143,7 +63,7 @@ module.exports = (app, repository, avApiClient) => {
                                                          'timestamp-voting-session-start': new Date().toISOString()}), (err, reply) => {
           res.send(formatStart(text))
           console.log('persistStory')
-          persistStory(text, channel_id, req.body.user_id)
+          persistStory(text, channel_id, req.body.user_id, avApiClient, repository)
         })
       })
     }
@@ -179,7 +99,7 @@ module.exports = (app, repository, avApiClient) => {
         repository.set(channel_id+"-"+ticket_description+"-revealed", JSON.stringify({'user-voting-session-revealor' : user_id, 'timestamp-vote-revealed': new Date().toISOString()}), (err, reply) => {
           res.send(formatResult(text, votes))
 
-          persistReveal(text, channel_id)
+          persistReveal(text, channel_id, avApiClient, repository)
         })
       } else {
         // TODO: Count vote for different voting sessions
@@ -194,7 +114,7 @@ module.exports = (app, repository, avApiClient) => {
             repository.set(channel_id + "-" + ticket_description + "-record-by-user-id", JSON.stringify(votes_by_id), (err, reply) => {
               res.send(formatRegister(text, votes))
 
-              persistVote(text, channel_id, user_id, actions[0].value)
+              persistVote(text, channel_id, user_id, actions[0].value, avApiClient, repository)
             })
           })
         })
