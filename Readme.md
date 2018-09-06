@@ -66,4 +66,5 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
   - [Getting started with Slack apps](https://api.slack.com/slack-apps)
   - [Using ngrok to develop locally for Slack](https://api.slack.com/tutorials/tunneling-with-ngrok)
+  - [Sam's blog on the motivation for asyncvoter](https://medium.com/agileventures/fallow-day-9194de55979e)
   - [One of Sam's blogs on the background of AsyncVoter](https://medium.com/agileventures/automating-what-to-do-next-7295c62007d9)
