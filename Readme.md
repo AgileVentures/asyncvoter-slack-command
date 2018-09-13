@@ -11,7 +11,7 @@ You can vote on any thing: you just provide some text to display. (You can inclu
 3. Submit your vote pressing on any of the three difficulty buttons (Easy, Medium or Hard).
 4. Finish and reveal the result of the voting session by pressing on the `Reveal` button. (We recommend to wait until you will receive 3 or more votes)
 
-## Install in a new Slack instance
+## Install in a new Slack instance (Production)
 
 Install app to your Slack team visiting https://production.asyncvoter.agileventures.org and pressing on the `Add to Slack` button.
 
@@ -40,13 +40,13 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 * ensure [redis](https://redis.io/topics/quickstart) is running
 
-* Run tests 
+* Run tests
 
   ```
   npm test
   ```
 
-* Run the server 
+* Run the server
 
   ```
   npm run dev
@@ -54,13 +54,39 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 * You **need** to set up your own Slack **team** and Slack **app** to continue!
 
+- SetUp a secure tunnel to your localhost server using [ngrok](https://ngrok.com/download)
+    - Install `ngrok` and run `ngrok http 4390` to expose your local server
+
+    You'll get a unique `<YOUR-NGROK-URL>` as shown bellow:
+
+    ![](https://i.imgur.com/FWwqDsb.png)
+
+    *Note : You will get a new ngrok url each time you restart the ngrok program. You will also have to update the given url in your Slack app.*
+
+
+- SetUp  & configure slack app
     - [Create a Slack Team](https://slack.com/create)
     - [Create a Slack app](https://api.slack.com/apps?new_app=1)
-    - Install `ngrok` and run `ngrok http 4390` to expose your local server
-    - Enable `Slash Commands` in your Slack app with `https://<YOUR-NGROK-URL>/commands`
-    - Enable `Interactive Messages` in your Slack app with `https://<YOUR-NGROK-URL>/actions`
-    - Rename `.env.example` to `.env` and set your Slack app tokens there
+    - Install the app to your team
+    - Rename `.env.example` to `.env` and set your Slack app tokens there, click on the app to find its Credentials
+    - Go to [your apps](https://api.slack.com/apps) and select voter app.
+    - Enable `Slash Commands` in your Slack app use command `/voter`
+    - Add a new command */voter* in your app, and set `Request Url` to `https://<YOUR-NGROK-URL>/commands`
+    - Enable `Interactive Components` in your Slack app, and set Request Url to `https://<YOUR-NGROK-URL>/actions`
     - Go to <http://localhost:4390> and follow the instructions.
+
+
+- Test the Asyncvoter
+
+     From your Slack team, try to run
+     ```
+    /voter https://www.pivotaltracker.com/story/show/45392619
+    ```
+    You should see the following:
+    ![](https://i.imgur.com/kdfSfMK.png)
+
+    Click on any choice to vote and to see the votes, click on reveal
+
 
 ## References
 
