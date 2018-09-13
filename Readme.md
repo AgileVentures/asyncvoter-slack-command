@@ -78,7 +78,7 @@ Create an issue in this repo, or contact us at [#async_voter](https://agileventu
 
 - Test the Asyncvoter
 
-     From your salck team, try to run
+     From your Slack team, try to run
      ```
     /voter https://www.pivotaltracker.com/story/show/45392619
     ```
